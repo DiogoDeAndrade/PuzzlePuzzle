@@ -3,8 +3,9 @@ using UnityEngine;
 
 public class PuzzleTile : MonoBehaviour
 {
-    [SerializeField] private Color normalColor = Color.white;
-    [SerializeField] private Color highlightColor = Color.white;
+    [SerializeField] private Color          normalColor = Color.white;
+    [SerializeField] private Color          highlightColor = Color.white;
+    [SerializeField] private SpriteRenderer imageSpriteRenderer;
 
     public Vector2Int gridPos;
 
@@ -59,5 +60,12 @@ public class PuzzleTile : MonoBehaviour
     Rect GetWorldRect()
     {
         return new Rect(transform.position.x - tileSize.x * 0.5f, transform.position.y - tileSize.y * 0.5f, tileSize.x, tileSize.y);
+    }
+
+    public void SetImage(Sprite sprite)
+    {
+        if (imageSpriteRenderer == null) return;
+        imageSpriteRenderer.enabled = (sprite != null);
+        imageSpriteRenderer.sprite = sprite;
     }
 }

@@ -15,20 +15,29 @@ public class PuzzleState
 {
     class PuzzleElement
     {
+        public Vector2Int originalPosition;
+
+        public PuzzleElement(Vector2Int originalPosition)
+        {
+            this.originalPosition = originalPosition;
+        }
+
         public PuzzleElement Clone()
         {
-            return new PuzzleElement();
+            return new PuzzleElement(originalPosition);
         }
     };
 
-    private PuzzleType puzzleType;
-    private Vector2Int gridSize;
-    private PuzzleElement[,] state;
+    private PuzzleType          puzzleType;
+    private Vector2Int          gridSize;
+    private bool                hasImage;
+    private PuzzleElement[,]    state;
 
-    public PuzzleState(PuzzleType puzzleType, Vector2Int gridSize)
+    public PuzzleState(PuzzleType puzzleType, Vector2Int gridSize, bool hasImage)
     {
         this.gridSize = gridSize;
         this.puzzleType = puzzleType;
+        this.hasImage = hasImage;
 
         state = new PuzzleElement[gridSize.x, gridSize.y];
     }
@@ -39,7 +48,7 @@ public class PuzzleState
         {
             for (int x = 0; x < gridSize.x; x++)
             {
-                state[x, y] = new PuzzleElement();
+                state[x, y] = new PuzzleElement(new Vector2Int(x, y));
             }
         }
     }
@@ -88,6 +97,11 @@ public class PuzzleState
         return state[x, y] != null;
     }
 
+    public Vector2Int GetOriginalPosition(int x, int y)
+    {
+        return state[x, y].originalPosition;
+    }
+
     public bool IsSame(PuzzleState currentState)
     {
         if (puzzleType != currentState.puzzleType) return false;
@@ -110,7 +124,7 @@ public class PuzzleState
 
     public PuzzleState Clone()
     {
-        var ret = new PuzzleState(puzzleType, gridSize);
+        var ret = new PuzzleState(puzzleType, gridSize, hasImage);
         for (int y = 0; y < gridSize.y; y++)
         {
             for (int x = 0; x < gridSize.x; x++)
@@ -129,11 +143,31 @@ public class PuzzleState
     {
         if ((puzzleType & PuzzleType.Sliding) != 0)
         {
-            // Remove a piece from the puzzle
-            int rx = (gridSize.x % 2 != 0) ? (Mathf.FloorToInt(gridSize.x * 0.5f)) : 0;
-            int ry = (gridSize.y % 2 != 0) ? (Mathf.FloorToInt(gridSize.y * 0.5f)) : gridSize.y - 1;
+            // Check center piece
+            if (hasImage)
+            {
+                for (int y = 0; y < gridSize.y; y++)
+                {
+                    for (int x = 0; x < gridSize.x; x++)
+                    {
+                        if (state[x, y] != null)
+                        {
+                            if ((state[x, y].originalPosition.x != x) ||
+                                (state[x, y].originalPosition.y != y))
+                            {
+                                return false;
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                int rx = (gridSize.x % 2 != 0) ? (Mathf.FloorToInt(gridSize.x * 0.5f)) : 0;
+                int ry = (gridSize.y % 2 != 0) ? (Mathf.FloorToInt(gridSize.y * 0.5f)) : gridSize.y - 1;
 
-            if (state[rx, ry] != null) return false;
+                if (state[rx, ry] != null) return false;
+            }
         }
 
         return true;

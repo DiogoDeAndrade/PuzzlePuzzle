@@ -11,7 +11,6 @@ This month, the theme is "Lights Out".
 ## Todo
 
 - Sliding puzzle
-  - Image puzzle
   - Unmoveable pieces
 - Added lights out mechanic
   - Shuffle
@@ -36,6 +35,8 @@ This month, the theme is "Lights Out".
 ## Art
 
 - [Puzzle Pack 2](https://kenney.nl/assets/puzzle-pack-2) by [Kenney](https://kenney.nl), licensed through the [CC0] license.
+- Photo [Brown Wooden Cube on Gray Textile](https://www.pexels.com/photo/brown-wooden-cube-on-gray-textile-6469463/) by [Eva Bronzini](https://www.pexels.com/@eva-bronzini/), free to use.
+- Photo [Assorted-color Pencil Set](https://www.pexels.com/photo/assorted-color-pencil-set-459799/) by [Pixabay](https://www.pexels.com/@pixabay/), licensed through the [CC0] license.
 - Everything else done by [Diogo de Andrade], licensed through the [CC0] license.
 
 ## Sound

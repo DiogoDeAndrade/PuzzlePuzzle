@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using NaughtyAttributes;
 using UnityEngine;
 using TMPro;
+using UnityEngine.U2D;
 
 public class Puzzle : MonoBehaviour
 {
@@ -22,8 +23,10 @@ public class Puzzle : MonoBehaviour
     private float           interactionCooldown = 0.5f;
     [SerializeField]
     private float           animationTime = 0.25f;
-    [SerializeField, Header("Prefabs")] 
+    [SerializeField, Header("Tiles")] 
     private PuzzleTile      baseTilePrefab;
+    [SerializeField]
+    private Texture2D       baseImage;
     [SerializeField, Header("References")]
     private SpriteRenderer  puzzleBackground;
     [SerializeField]
@@ -155,16 +158,26 @@ public class Puzzle : MonoBehaviour
             puzzleBackground.size = new Vector2(_tileSize.x * gridSize.x + 8, _tileSize.y * gridSize.y + 8);
         }
 
-        currentState = new PuzzleState(puzzleType, gridSize);
+        currentState = new PuzzleState(puzzleType, gridSize, baseImage != null);
         currentState.Identity();
 
         if ((puzzleType & PuzzleType.Sliding) != 0)
         {
             // Remove a piece from the puzzle
-            int rx = (gridSize.x % 2 != 0) ? (Mathf.FloorToInt(gridSize.x * 0.5f)) : 0;
-            int ry = (gridSize.y % 2 != 0) ? (Mathf.FloorToInt(gridSize.y * 0.5f)) : gridSize.y - 1;
+            if (baseImage)
+            {
+                // Remove a piece from the puzzle
+                var clearPiece = gridSize.RandomXY(randomGenerator);
 
-            currentState.Clear(rx, ry);
+                currentState.Clear(clearPiece.x, clearPiece.y);
+            }
+            else
+            {
+                int rx = (gridSize.x % 2 != 0) ? (Mathf.FloorToInt(gridSize.x * 0.5f)) : 0;
+                int ry = (gridSize.y % 2 != 0) ? (Mathf.FloorToInt(gridSize.y * 0.5f)) : gridSize.y - 1;
+
+                currentState.Clear(rx, ry);
+            }
         }
 
         if (shuffle)
@@ -269,6 +282,22 @@ public class Puzzle : MonoBehaviour
                     currentTiles[x, y].gridPos = new Vector2Int(x, y);
                     currentTiles[x, y].name = $"Piece {index++}";
                     currentTiles[x, y].transform.position = new Vector3(x * _tileSize.x + _worldOffset.x + _tileSize.x * 0.5f, y * _tileSize.y + _worldOffset.y + _tileSize.y * 0.5f, 0.0f);
+                    if (baseImage)
+                    {
+                        var op = currentState.GetOriginalPosition(x, y);
+                        float tw = tileSize.x;
+                        float th = tileSize.y;
+                        Rect uv = new Rect(op.x * tw, op.y * th, tw, th);
+
+                        Sprite sprite = Sprite.Create(baseImage, uv, new Vector2(0.5f, 0.5f), 1.0f);
+                        sprite.name = $"Custom Sprite ({baseImage.name}: {uv})";
+
+                        currentTiles[x, y].SetImage(sprite);
+                    }
+                    else
+                    {
+                        currentTiles[x, y].SetImage(null);
+                    }
                 }
             }
         }
