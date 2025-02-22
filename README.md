@@ -10,8 +10,6 @@ This month, the theme is "Lights Out".
 
 ## Todo
 
-- Sliding puzzle
-  - Unmoveable pieces
 - Added lights out mechanic
   - Shuffle
   - Activate/deactivate light

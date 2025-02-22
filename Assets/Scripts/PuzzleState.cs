@@ -15,11 +15,14 @@ public class PuzzleState
 {
     class PuzzleElement
     {
-        public Vector2Int originalPosition;
+        public Vector2Int   originalPosition;
+        public bool         immoveable;
 
         public PuzzleElement(Vector2Int originalPosition)
         {
             this.originalPosition = originalPosition;
+
+            immoveable = false;
         }
 
         public PuzzleElement Clone()
@@ -58,6 +61,14 @@ public class PuzzleState
         state[x, y] = null;
     }
 
+    public void SetImmoveable(int x, int y, bool v)
+    {
+        if (state[x, y] != null)
+        {
+            state[x, y].immoveable = v;
+        }
+    }
+
     public void Swap(Vector2Int p1, Vector2Int p2)
     {
         var tmp = state[p2.x, p2.y];
@@ -65,13 +76,15 @@ public class PuzzleState
         state[p1.x, p1.y] = tmp;
     }
 
-    public Vector2Int GetRandomGridPos(System.Random randomGenerator, bool withEmptyNeighbour)
+    public Vector2Int GetRandomGridPos(System.Random randomGenerator, bool withEmptyNeighbour, bool allowImmobile)
     {
         while (true)
         {
             var pos = gridSize.RandomXY(randomGenerator);
             if (state[pos.x, pos.y] != null)
             {
+                if ((!allowImmobile) && (GetImmoveable(pos.x, pos.y))) continue;
+
                 if (withEmptyNeighbour)
                 {
                     if (GetEmptyNeighbour(pos, out var neighbour)) return pos;
@@ -100,6 +113,11 @@ public class PuzzleState
     public Vector2Int GetOriginalPosition(int x, int y)
     {
         return state[x, y].originalPosition;
+    }
+
+    public bool GetImmoveable(int x, int y)
+    {
+        return state[x, y].immoveable;
     }
 
     public bool IsSame(PuzzleState currentState)

@@ -11,6 +11,8 @@ public class Puzzle : MonoBehaviour
     private PuzzleType      puzzleType = PuzzleType.Sliding;
     [SerializeField] 
     private Vector2Int      gridSize = new Vector2Int(2, 2);
+    [SerializeField, ShowIf(nameof(isSliding))]
+    private int             unmoveablePieceCount;
     [SerializeField]
     private bool            shuffle;
     [SerializeField, ShowIf(nameof(shuffle))]
@@ -63,6 +65,8 @@ public class Puzzle : MonoBehaviour
     public bool inputEnabled => (interactionTimer <= 0.0f);
     public Camera mainCamera => _mainCamera;
 
+    bool isSliding => (puzzleType & PuzzleType.Sliding) != 0;
+
     void Start()
     {
         Build();
@@ -98,6 +102,8 @@ public class Puzzle : MonoBehaviour
     void HandleLeftClick()
     {
         if (!GetMouseGridPos(out var gridPos)) return;
+
+        if (currentState.GetImmoveable(gridPos.x, gridPos.y)) return;
 
         if (currentState.GetEmptyNeighbour(gridPos, out var neighbour))
         {
@@ -163,6 +169,13 @@ public class Puzzle : MonoBehaviour
 
         if ((puzzleType & PuzzleType.Sliding) != 0)
         {
+            for (int i = 0; i < unmoveablePieceCount; i++)
+            {
+                var p = gridSize.RandomXY(randomGenerator);
+
+                currentState.SetImmoveable(p.x, p.y, true);
+            }
+
             // Remove a piece from the puzzle
             if (baseImage)
             {
@@ -201,7 +214,7 @@ public class Puzzle : MonoBehaviour
                 int nTries = 0;
                 while (nTries < 10)
                 {
-                    var gridPos = currentState.GetRandomGridPos(randomGenerator, true);
+                    var gridPos = currentState.GetRandomGridPos(randomGenerator, true, false);
                     currentState.GetEmptyNeighbour(gridPos, out var neighbour);
 
                     currentState.Swap(gridPos, neighbour);
@@ -282,6 +295,7 @@ public class Puzzle : MonoBehaviour
                     currentTiles[x, y].gridPos = new Vector2Int(x, y);
                     currentTiles[x, y].name = $"Piece {index++}";
                     currentTiles[x, y].transform.position = new Vector3(x * _tileSize.x + _worldOffset.x + _tileSize.x * 0.5f, y * _tileSize.y + _worldOffset.y + _tileSize.y * 0.5f, 0.0f);
+                    currentTiles[x, y].SetImmoveable(currentState.GetImmoveable(x, y));
                     if (baseImage)
                     {
                         var op = currentState.GetOriginalPosition(x, y);

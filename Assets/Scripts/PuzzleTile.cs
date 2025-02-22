@@ -4,8 +4,10 @@ using UnityEngine;
 public class PuzzleTile : MonoBehaviour
 {
     [SerializeField] private Color          normalColor = Color.white;
+    [SerializeField] private Color          immoveableColor = Color.white;
     [SerializeField] private Color          highlightColor = Color.white;
     [SerializeField] private SpriteRenderer imageSpriteRenderer;
+    [SerializeField] private SpriteRenderer immoveableSprite;
 
     public Vector2Int gridPos;
 
@@ -13,11 +15,13 @@ public class PuzzleTile : MonoBehaviour
     Vector2         offset;
     Puzzle          owner;
     SpriteRenderer  baseSpriteRenderer;
+    bool            immoveable = false;
 
     private void Start()
     {
         owner = GetComponentInParent<Puzzle>();
         baseSpriteRenderer = GetComponent<SpriteRenderer>();
+        if (immoveableSprite) immoveableSprite.enabled = immoveable;
 
         tileSize = owner.tileSize;
         offset = owner.worldOffset;
@@ -25,7 +29,11 @@ public class PuzzleTile : MonoBehaviour
 
     private void Update()
     {        
-        if (owner.inputEnabled)
+        if (immoveable)
+        {
+            baseSpriteRenderer.color = immoveableColor;
+        }
+        else if (owner.inputEnabled)
         {
             var worldPos = owner.mainCamera.ScreenToWorldPoint(Input.mousePosition);
             if (GetWorldRect().Contains(worldPos))
@@ -60,6 +68,12 @@ public class PuzzleTile : MonoBehaviour
     Rect GetWorldRect()
     {
         return new Rect(transform.position.x - tileSize.x * 0.5f, transform.position.y - tileSize.y * 0.5f, tileSize.x, tileSize.y);
+    }
+
+    public void SetImmoveable(bool b)
+    {
+        immoveable = b;
+        if (immoveableSprite) immoveableSprite.enabled = immoveable;
     }
 
     public void SetImage(Sprite sprite)
