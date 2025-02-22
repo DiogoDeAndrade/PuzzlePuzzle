@@ -1,0 +1,65 @@
+# PUZZLE PUZZLE
+
+![Title](Screenshots/title.png)
+
+Developed for the February [Game Creator's Club] at Lusofona University.
+This month, the theme is "Lights Out". 
+
+## Game
+
+
+## Todo
+
+- Sliding puzzle
+  - Move sliding element
+  - Check solution
+  - Unmoveable pieces
+- Added lights out mechanic
+  - Shuffle
+  - Activate/deactivate light
+  - Check solution
+  - No lights pieces
+- Pipemania
+  - Build puzzle
+  - Shuffle puzzle
+  - Rotate piece
+  - Check solution
+  - No rotation pieces
+- Polish
+  - Entry/exit point of pipemania
+  - Background objects
+  - Puzzle in/out
+  - Sounds
+    - Move success sound
+    - Move fail sound
+    - Puzzle solved sound
+
+## Art
+
+- [Puzzle Pack 2](https://kenney.nl/assets/puzzle-pack-2) by [Kenney](https://kenney.nl), licensed through the [CC0] license.
+- Everything else done by [Diogo de Andrade], licensed through the [CC0] license.
+
+## Sound
+
+- Everything else done by [Diogo de Andrade], licensed through the [CC0] license.
+
+## Code
+
+- Uses [Unity Common], [MIT] license.
+- All remaining game source code by Diogo de Andrade is licensed under the [MIT] license.
+
+## Metadata
+
+- Autor: [Diogo de Andrade]
+
+[Diogo de Andrade]:https://github.com/DiogoDeAndrade
+[CC0]:https://creativecommons.org/publicdomain/zero/1.0/
+[CC-BY 3.0]:https://creativecommons.org/licenses/by/3.0/
+[CC-BY-NC 3.0]:https://creativecommons.org/licenses/by-nc/3.0/
+[CC-BY-SA 4.0]:http://creativecommons.org/licenses/by-sa/4.0/
+[CC-BY 4.0]:https://creativecommons.org/licenses/by/4.0/
+[CC-BY-NC 4.0]:https://creativecommons.org/licenses/by-nc/4.0/
+[OkapiKit]:https://github.com/VideojogosLusofona/OkapiKit
+[Unity Common]:https://github.com/DiogoDeAndrade/UnityCommon
+[Game Creator's Club]:https://game-creators-club.itch.io/
+[MIT]:LICENSE
