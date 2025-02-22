@@ -18,12 +18,19 @@ public class Puzzle : MonoBehaviour
     private bool            randomSeed;
     [SerializeField, HideIf(nameof(randomSeed))]
     private int             seed;
+    [SerializeField, Header("Interaction")]
+    private float           interactionCooldown = 0.5f;
+    [SerializeField]
+    private float           animationTime = 0.25f;
     [SerializeField, Header("Prefabs")] 
     private PuzzleTile      baseTilePrefab;
-    [SerializeField, Header("Visuals")]
+    [SerializeField, Header("References")]
     private SpriteRenderer  puzzleBackground;
     [SerializeField]
     private TextMeshProUGUI solutionText;
+    [SerializeField]
+    private Camera          _mainCamera;
+
 
     class PuzzleElement
     {        
@@ -38,14 +45,20 @@ public class Puzzle : MonoBehaviour
         public Vector2Int       end;
     }
 
-    Vector2                 tileSize;
-    Vector2                 offset;
+    Vector2                 _tileSize;
+    Vector2                 _worldOffset;
     PuzzleState             currentState;
     PuzzleTile[,]           currentTiles;
     List<PuzzleState>       prevStates;
     List<SolutionElement>   solution;
     System.Random           randomGenerator;
+    float                   interactionTimer;
+    bool                    completed = false;
 
+    public Vector2 tileSize => _tileSize;
+    public Vector2 worldOffset => _worldOffset;
+    public bool inputEnabled => (interactionTimer <= 0.0f);
+    public Camera mainCamera => _mainCamera;
 
     void Start()
     {
@@ -54,7 +67,71 @@ public class Puzzle : MonoBehaviour
 
     void Update()
     {
-        
+        if (completed)
+        {
+            return;
+        }
+
+        if (interactionTimer > 0.0f)
+        {
+            interactionTimer -= Time.deltaTime;
+        }
+        else
+        {
+            if (currentState.CheckSolution())
+            {
+                Debug.Log("Puzzle completed!");
+                completed = true;
+                return;
+            }
+
+            if (Input.GetMouseButtonDown(0))
+            {
+                HandleLeftClick();
+            }
+        }
+    }
+
+    void HandleLeftClick()
+    {
+        if (!GetMouseGridPos(out var gridPos)) return;
+
+        if (currentState.GetEmptyNeighbour(gridPos, out var neighbour))
+        {
+            // Ok sound
+
+            // Get actual object
+            currentTiles[gridPos.x, gridPos.y].MoveTo(neighbour, animationTime);
+            currentTiles[neighbour.x, neighbour.y] = currentTiles[gridPos.x, gridPos.y];
+            currentTiles[gridPos.x, gridPos.y] = null;
+            currentState.Swap(gridPos, neighbour);
+        }
+        else
+        {
+            // Bad sound
+        }
+
+        interactionTimer = interactionCooldown;
+    }
+
+    bool GetMouseGridPos(out Vector2Int gridPos)
+    {
+        var worldPos = _mainCamera.ScreenToWorldPoint(Input.mousePosition);
+
+        for (int y = 0; y < gridSize.y; y++)
+        {
+            for (int x = 0; x < gridSize.x; x++)
+            {
+                Rect rect = new Rect(x * _tileSize.x + _worldOffset.x, y * _tileSize.y + _worldOffset.y, _tileSize.x, _tileSize.y);
+                if (rect.Contains(worldPos))
+                {
+                    gridPos = new Vector2Int(x, y);
+                    return true;
+                }
+            }
+        }
+        gridPos = Vector2Int.zero;
+        return false;
     }
 
     [Button("Build")]
@@ -63,19 +140,19 @@ public class Puzzle : MonoBehaviour
         randomGenerator = new System.Random();
         if (!randomSeed) randomGenerator = new System.Random(seed);
 
-        tileSize = Vector2.zero;
+        _tileSize = Vector2.zero;
         var sr = baseTilePrefab.GetComponent<SpriteRenderer>();
         if (sr == null)
         {
             Debug.LogError("Base tile needs a sprite renderer at root level");
             return;
         }
-        tileSize = sr.bounds.size;
-        offset = new Vector2(-gridSize.x * tileSize.x * 0.5f, -gridSize.y * tileSize.y * 0.5f);
+        _tileSize = sr.bounds.size;
+        _worldOffset = new Vector2(-gridSize.x * _tileSize.x * 0.5f, -gridSize.y * _tileSize.y * 0.5f);
 
         if (puzzleBackground)
         {
-            puzzleBackground.size = new Vector2(tileSize.x * gridSize.x + 8, tileSize.y * gridSize.y + 8);
+            puzzleBackground.size = new Vector2(_tileSize.x * gridSize.x + 8, _tileSize.y * gridSize.y + 8);
         }
 
         currentState = new PuzzleState(puzzleType, gridSize);
@@ -180,6 +257,7 @@ public class Puzzle : MonoBehaviour
     {
         Clear();
 
+        int index = 0;
         currentTiles = new PuzzleTile[gridSize.x, gridSize.y];
         for (int y = 0; y < gridSize.y; y++)
         {
@@ -188,7 +266,9 @@ public class Puzzle : MonoBehaviour
                 if (currentState.HasElement(x, y))
                 {
                     currentTiles[x, y] = Instantiate(baseTilePrefab, transform);
-                    currentTiles[x, y].transform.position = new Vector3(x * tileSize.x + offset.x + tileSize.x * 0.5f, y * tileSize.y + offset.y + tileSize.y * 0.5f, 0.0f);
+                    currentTiles[x, y].gridPos = new Vector2Int(x, y);
+                    currentTiles[x, y].name = $"Piece {index++}";
+                    currentTiles[x, y].transform.position = new Vector3(x * _tileSize.x + _worldOffset.x + _tileSize.x * 0.5f, y * _tileSize.y + _worldOffset.y + _tileSize.y * 0.5f, 0.0f);
                 }
             }
         }
@@ -215,5 +295,21 @@ public class Puzzle : MonoBehaviour
             Destroy(obj);
 #endif
         }
+    }
+
+    [Button("List Pieces")]
+    void ListPieces()
+    {
+        string str = "";
+        for (int y = 0; y < gridSize.y; y++)
+        {
+            for (int x = 0; x < gridSize.x; x++)
+            {
+                if (currentTiles[x, y] == null) str += $"({x}, {y}) = NULL\n";
+                else str += $"({x}, {y}) = {currentTiles[x, y].name}\n";
+            }
+        }
+
+        Debug.Log(str);
     }
 }

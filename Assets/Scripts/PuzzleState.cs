@@ -124,4 +124,18 @@ public class PuzzleState
 
         return ret;
     }
+
+    public bool CheckSolution()
+    {
+        if ((puzzleType & PuzzleType.Sliding) != 0)
+        {
+            // Remove a piece from the puzzle
+            int rx = (gridSize.x % 2 != 0) ? (Mathf.FloorToInt(gridSize.x * 0.5f)) : 0;
+            int ry = (gridSize.y % 2 != 0) ? (Mathf.FloorToInt(gridSize.y * 0.5f)) : gridSize.y - 1;
+
+            if (state[rx, ry] != null) return false;
+        }
+
+        return true;
+    }
 }
