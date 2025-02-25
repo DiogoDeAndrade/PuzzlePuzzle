@@ -65,7 +65,8 @@ public class Puzzle : MonoBehaviour
     public bool inputEnabled => (interactionTimer <= 0.0f);
     public Camera mainCamera => _mainCamera;
 
-    bool isSliding => (puzzleType & PuzzleType.Sliding) != 0;
+    public bool isSliding => (puzzleType & PuzzleType.Sliding) != 0;
+    public bool isLightsOut => (puzzleType & PuzzleType.LightsOut) != 0;
 
     void Start()
     {
@@ -312,6 +313,7 @@ public class Puzzle : MonoBehaviour
                     {
                         currentTiles[x, y].SetImage(null);
                     }
+                    currentTiles[x, y].SetLight(true);
                 }
             }
         }

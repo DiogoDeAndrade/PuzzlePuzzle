@@ -518,6 +518,9 @@ MonoBehaviour:
   immoveableColor: {r: 1, g: 1, b: 1, a: 0.14901961}
   highlightColor: {r: 1, g: 0.9992342, b: 0.6556604, a: 0.7490196}
   imageSpriteRenderer: {fileID: 413556806}
+  lightSprite: {fileID: 0}
+  lightOnSprite: {fileID: 0}
+  lightOffSprite: {fileID: 0}
   immoveableSprite: {fileID: 73508908}
   gridPos: {x: 1, y: 2}
 --- !u!212 &195152224
@@ -924,6 +927,9 @@ MonoBehaviour:
   immoveableColor: {r: 1, g: 1, b: 1, a: 0.14901961}
   highlightColor: {r: 1, g: 0.9992342, b: 0.6556604, a: 0.7490196}
   imageSpriteRenderer: {fileID: 696771776}
+  lightSprite: {fileID: 0}
+  lightOnSprite: {fileID: 0}
+  lightOffSprite: {fileID: 0}
   immoveableSprite: {fileID: 34078973}
   gridPos: {x: 0, y: 2}
 --- !u!212 &320041669
@@ -1243,6 +1249,9 @@ MonoBehaviour:
   immoveableColor: {r: 1, g: 1, b: 1, a: 0.14901961}
   highlightColor: {r: 1, g: 0.9992342, b: 0.6556604, a: 0.7490196}
   imageSpriteRenderer: {fileID: 1585032163}
+  lightSprite: {fileID: 0}
+  lightOnSprite: {fileID: 0}
+  lightOffSprite: {fileID: 0}
   immoveableSprite: {fileID: 1373517397}
   gridPos: {x: 0, y: 1}
 --- !u!212 &382862884
@@ -1525,6 +1534,9 @@ MonoBehaviour:
   immoveableColor: {r: 1, g: 1, b: 1, a: 0.14901961}
   highlightColor: {r: 1, g: 0.9992342, b: 0.6556604, a: 0.7490196}
   imageSpriteRenderer: {fileID: 1756547872}
+  lightSprite: {fileID: 0}
+  lightOnSprite: {fileID: 0}
+  lightOffSprite: {fileID: 0}
   immoveableSprite: {fileID: 681524263}
   gridPos: {x: 1, y: 4}
 --- !u!212 &485717754
@@ -2156,6 +2168,9 @@ MonoBehaviour:
   immoveableColor: {r: 1, g: 1, b: 1, a: 0.14901961}
   highlightColor: {r: 1, g: 0.9992342, b: 0.6556604, a: 0.7490196}
   imageSpriteRenderer: {fileID: 623596937}
+  lightSprite: {fileID: 0}
+  lightOnSprite: {fileID: 0}
+  lightOffSprite: {fileID: 0}
   immoveableSprite: {fileID: 907990536}
   gridPos: {x: 1, y: 0}
 --- !u!212 &585163270
@@ -3944,6 +3959,9 @@ MonoBehaviour:
   immoveableColor: {r: 1, g: 1, b: 1, a: 0.14901961}
   highlightColor: {r: 1, g: 0.9992342, b: 0.6556604, a: 0.7490196}
   imageSpriteRenderer: {fileID: 895324260}
+  lightSprite: {fileID: 0}
+  lightOnSprite: {fileID: 0}
+  lightOffSprite: {fileID: 0}
   immoveableSprite: {fileID: 1079904730}
   gridPos: {x: 2, y: 3}
 --- !u!212 &784248056
@@ -4139,6 +4157,9 @@ MonoBehaviour:
   immoveableColor: {r: 1, g: 1, b: 1, a: 0.14901961}
   highlightColor: {r: 1, g: 0.9992342, b: 0.6556604, a: 0.7490196}
   imageSpriteRenderer: {fileID: 494295046}
+  lightSprite: {fileID: 0}
+  lightOnSprite: {fileID: 0}
+  lightOffSprite: {fileID: 0}
   immoveableSprite: {fileID: 1653522113}
   gridPos: {x: 0, y: 0}
 --- !u!212 &880271523
@@ -4247,6 +4268,9 @@ MonoBehaviour:
   immoveableColor: {r: 1, g: 1, b: 1, a: 0.14901961}
   highlightColor: {r: 1, g: 0.9992342, b: 0.6556604, a: 0.7490196}
   imageSpriteRenderer: {fileID: 1206524676}
+  lightSprite: {fileID: 0}
+  lightOnSprite: {fileID: 0}
+  lightOffSprite: {fileID: 0}
   immoveableSprite: {fileID: 1365157765}
   gridPos: {x: 2, y: 1}
 --- !u!212 &884146078
@@ -4719,7 +4743,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 726b151e51fc4f346868dbb459283937, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  puzzleType: 1
+  puzzleType: 2
   gridSize: {x: 3, y: 5}
   unmoveablePieceCount: 2
   shuffle: 1
@@ -5200,6 +5224,9 @@ MonoBehaviour:
   immoveableColor: {r: 1, g: 1, b: 1, a: 0.14901961}
   highlightColor: {r: 1, g: 0.9992342, b: 0.6556604, a: 0.7490196}
   imageSpriteRenderer: {fileID: 1201224980}
+  lightSprite: {fileID: 0}
+  lightOnSprite: {fileID: 0}
+  lightOffSprite: {fileID: 0}
   immoveableSprite: {fileID: 505307189}
   gridPos: {x: 1, y: 3}
 --- !u!212 &1190231496
@@ -5308,6 +5335,9 @@ MonoBehaviour:
   immoveableColor: {r: 1, g: 1, b: 1, a: 0.14901961}
   highlightColor: {r: 1, g: 0.9992342, b: 0.6556604, a: 0.7490196}
   imageSpriteRenderer: {fileID: 402688867}
+  lightSprite: {fileID: 0}
+  lightOnSprite: {fileID: 0}
+  lightOffSprite: {fileID: 0}
   immoveableSprite: {fileID: 1600362403}
   gridPos: {x: 2, y: 2}
 --- !u!212 &1199366654
@@ -6324,6 +6354,9 @@ MonoBehaviour:
   immoveableColor: {r: 1, g: 1, b: 1, a: 0.14901961}
   highlightColor: {r: 1, g: 0.9992342, b: 0.6556604, a: 0.7490196}
   imageSpriteRenderer: {fileID: 122752824}
+  lightSprite: {fileID: 0}
+  lightOnSprite: {fileID: 0}
+  lightOffSprite: {fileID: 0}
   immoveableSprite: {fileID: 276050995}
   gridPos: {x: 1, y: 1}
 --- !u!212 &1622819788
@@ -6731,6 +6764,9 @@ MonoBehaviour:
   immoveableColor: {r: 1, g: 1, b: 1, a: 0.14901961}
   highlightColor: {r: 1, g: 0.9992342, b: 0.6556604, a: 0.7490196}
   imageSpriteRenderer: {fileID: 1095772089}
+  lightSprite: {fileID: 0}
+  lightOnSprite: {fileID: 0}
+  lightOffSprite: {fileID: 0}
   immoveableSprite: {fileID: 1559374972}
   gridPos: {x: 2, y: 4}
 --- !u!212 &1707298078
@@ -6918,6 +6954,9 @@ MonoBehaviour:
   immoveableColor: {r: 1, g: 1, b: 1, a: 0.14901961}
   highlightColor: {r: 1, g: 0.9992342, b: 0.6556604, a: 0.7490196}
   imageSpriteRenderer: {fileID: 637295377}
+  lightSprite: {fileID: 0}
+  lightOnSprite: {fileID: 0}
+  lightOffSprite: {fileID: 0}
   immoveableSprite: {fileID: 721650386}
   gridPos: {x: 0, y: 3}
 --- !u!212 &1749130622
@@ -7691,6 +7730,9 @@ MonoBehaviour:
   immoveableColor: {r: 1, g: 1, b: 1, a: 0.14901961}
   highlightColor: {r: 1, g: 0.9992342, b: 0.6556604, a: 0.7490196}
   imageSpriteRenderer: {fileID: 860411864}
+  lightSprite: {fileID: 0}
+  lightOnSprite: {fileID: 0}
+  lightOffSprite: {fileID: 0}
   immoveableSprite: {fileID: 1297878874}
   gridPos: {x: 0, y: 4}
 --- !u!212 &1842740728

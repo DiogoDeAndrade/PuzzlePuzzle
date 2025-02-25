@@ -7,7 +7,11 @@ public class PuzzleTile : MonoBehaviour
     [SerializeField] private Color          immoveableColor = Color.white;
     [SerializeField] private Color          highlightColor = Color.white;
     [SerializeField] private SpriteRenderer imageSpriteRenderer;
+    [SerializeField] private SpriteRenderer lightSprite;
+    [SerializeField] private Sprite         lightOnSprite;
+    [SerializeField] private Sprite         lightOffSprite;
     [SerializeField] private SpriteRenderer immoveableSprite;
+
 
     public Vector2Int gridPos;
 
@@ -81,5 +85,12 @@ public class PuzzleTile : MonoBehaviour
         if (imageSpriteRenderer == null) return;
         imageSpriteRenderer.enabled = (sprite != null);
         imageSpriteRenderer.sprite = sprite;
+    }
+
+    public void SetLight(bool b)
+    {
+        if (owner == null) owner = GetComponentInParent<Puzzle>();
+        lightSprite.enabled = owner.isLightsOut;
+        lightSprite.sprite = (b) ? (lightOnSprite) : (lightOffSprite);
     }
 }

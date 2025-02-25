@@ -15,6 +15,7 @@ This month, the theme is "Lights Out".
   - Activate/deactivate light
   - Check solution
   - No lights pieces
+  - Combine lights out/sliding
 - Pipemania
   - Build puzzle
   - Shuffle puzzle
