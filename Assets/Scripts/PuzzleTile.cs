@@ -41,7 +41,7 @@ public class PuzzleTile : MonoBehaviour
         {
             baseSpriteRenderer.color = immoveableColor;
         }
-        else if (owner.inputEnabled)
+        else if ((owner.inputEnabled) && (!owner.isComplete))
         {
             var worldPos = owner.mainCamera.ScreenToWorldPoint(Input.mousePosition);
             if (GetWorldRect().Contains(worldPos))

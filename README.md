@@ -11,8 +11,6 @@ This month, the theme is "Lights Out".
 ## Todo
 
 - Added lights out mechanic
-  - Activate/deactivate light
-  - Check solution
   - Combine lights out/sliding
 - Pipemania
   - Build puzzle

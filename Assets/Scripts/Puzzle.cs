@@ -5,6 +5,7 @@ using UnityEngine;
 using TMPro;
 using UnityEngine.U2D;
 using UnityEngine.Rendering.RenderGraphModule;
+using static UnityEngine.RuleTile.TilingRuleOutput;
 
 public class Puzzle : MonoBehaviour
 {
@@ -68,6 +69,7 @@ public class Puzzle : MonoBehaviour
     public Vector2 tileSize => _tileSize;
     public Vector2 worldOffset => _worldOffset;
     public bool inputEnabled => (interactionTimer <= 0.0f);
+    public bool isComplete => completed;
     public Camera mainCamera => _mainCamera;
 
     public bool isSliding => (puzzleType & PuzzleType.Sliding) != 0;
@@ -109,21 +111,29 @@ public class Puzzle : MonoBehaviour
     {
         if (!GetMouseGridPos(out var gridPos)) return;
 
-        if (currentState.GetImmoveable(gridPos.x, gridPos.y)) return;
+        if (isSliding)
+        {
+            if (currentState.GetImmoveable(gridPos.x, gridPos.y)) return;
 
-        if (currentState.GetEmptyNeighbour(gridPos, out var neighbour))
+            if (currentState.GetEmptyNeighbour(gridPos, out var neighbour))
+            {
+                // Ok sound
+
+                // Get actual object
+                currentTiles[gridPos.x, gridPos.y].MoveTo(neighbour, animationTime);
+                currentTiles[neighbour.x, neighbour.y] = currentTiles[gridPos.x, gridPos.y];
+                currentTiles[gridPos.x, gridPos.y] = null;
+                currentState.Swap(gridPos, neighbour);
+            }
+            else
+            {
+                // Bad sound
+            }
+        }
+        else if (isLightsOut)
         {
             // Ok sound
-
-            // Get actual object
-            currentTiles[gridPos.x, gridPos.y].MoveTo(neighbour, animationTime);
-            currentTiles[neighbour.x, neighbour.y] = currentTiles[gridPos.x, gridPos.y];
-            currentTiles[gridPos.x, gridPos.y] = null;
-            currentState.Swap(gridPos, neighbour);
-        }
-        else
-        {
-            // Bad sound
+            currentState.ToggleLight(gridPos);
         }
 
         interactionTimer = interactionCooldown;
