@@ -4,37 +4,42 @@ using NaughtyAttributes;
 using UnityEngine;
 using TMPro;
 using UnityEngine.U2D;
+using UnityEngine.Rendering.RenderGraphModule;
 
 public class Puzzle : MonoBehaviour
 {
     [SerializeField, Header("Puzzle Parameters")] 
-    private PuzzleType      puzzleType = PuzzleType.Sliding;
+    private PuzzleType          puzzleType = PuzzleType.Sliding;
     [SerializeField] 
-    private Vector2Int      gridSize = new Vector2Int(2, 2);
-    [SerializeField, ShowIf(nameof(isSliding))]
-    private int             unmoveablePieceCount;
+    private Vector2Int          gridSize = new Vector2Int(2, 2);
     [SerializeField]
-    private bool            shuffle;
+    private bool                shuffle;
     [SerializeField, ShowIf(nameof(shuffle))]
-    private int             shuffleAmmount = 3;
+    private int                 shuffleAmmount = 3;
     [SerializeField]
-    private bool            randomSeed;
+    private bool                randomSeed;
     [SerializeField, HideIf(nameof(randomSeed))]
-    private int             seed;
+    private int                 seed;
+    [SerializeField, ShowIf(nameof(isSliding)), Header("Sliding")]
+    private int                 unmoveablePieceCount;
+    [SerializeField, ShowIf(nameof(isLightsOut)), Header("Lights Out")]
+    private PuzzleState.NeighborhoodType    neightborhoodType = PuzzleState.NeighborhoodType.VonNeumann;
+    [SerializeField, ShowIf(nameof(isLightsOut))]
+    private int                 neighborhoodDistance = 1;
     [SerializeField, Header("Interaction")]
-    private float           interactionCooldown = 0.5f;
+    private float               interactionCooldown = 0.5f;
     [SerializeField]
-    private float           animationTime = 0.25f;
+    private float               animationTime = 0.25f;
     [SerializeField, Header("Tiles")] 
-    private PuzzleTile      baseTilePrefab;
+    private PuzzleTile          baseTilePrefab;
     [SerializeField]
-    private Texture2D       baseImage;
+    private Texture2D           baseImage;
     [SerializeField, Header("References")]
-    private SpriteRenderer  puzzleBackground;
+    private SpriteRenderer      puzzleBackground;
     [SerializeField]
-    private TextMeshProUGUI solutionText;
+    private TextMeshProUGUI     solutionText;
     [SerializeField]
-    private Camera          _mainCamera;
+    private Camera              _mainCamera;
 
 
     class PuzzleElement
@@ -43,7 +48,7 @@ public class Puzzle : MonoBehaviour
 
     class SolutionElement
     {
-        public enum ActionType { Move, Rotate };
+        public enum ActionType { Move, Rotate, ToggleLight };
 
         public ActionType       action;
         public Vector2Int       start;
@@ -165,7 +170,7 @@ public class Puzzle : MonoBehaviour
             puzzleBackground.size = new Vector2(_tileSize.x * gridSize.x + 8, _tileSize.y * gridSize.y + 8);
         }
 
-        currentState = new PuzzleState(puzzleType, gridSize, baseImage != null);
+        currentState = new PuzzleState(puzzleType, gridSize, baseImage != null, neightborhoodType, neighborhoodDistance);
         currentState.Identity();
 
         if ((puzzleType & PuzzleType.Sliding) != 0)
@@ -254,6 +259,51 @@ public class Puzzle : MonoBehaviour
                 }
             }
         }
+        else if ((puzzleType & PuzzleType.LightsOut) != 0)
+        {
+            // It's a else if because the lights out + sliding is shuffled by the movement on the shuffling
+            for (int i = 0; i < shuffleAmmount; i++)
+            {
+                int nTries = 0;
+                while (nTries < 10)
+                {
+                    var gridPos = currentState.GetRandomGridPos(randomGenerator, false, true);
+
+                    currentState.ToggleLight(gridPos);
+
+                    // Check if state already exists in previous states
+                    bool alreadySeen = false;
+                    foreach (var prevState in prevStates)
+                    {
+                        if (prevState.IsSame(currentState))
+                        {
+                            alreadySeen = true;
+                            break;
+                        }
+                    }
+                    if (alreadySeen)
+                    {
+                        // This state has already existed, we need to undo what we did and try again
+                        currentState.ToggleLight(gridPos);
+
+                        nTries++;
+                        continue;
+                    }
+
+                    prevStates.Add(currentState.Clone());
+
+                    SolutionElement solutionElement = new()
+                    {
+                        action = SolutionElement.ActionType.ToggleLight,
+                        start = gridPos
+                    };
+
+                    solution.Add(solutionElement);
+
+                    break;
+                }
+            }
+        }
 
         solution.Reverse();
 
@@ -266,6 +316,9 @@ public class Puzzle : MonoBehaviour
                 {
                     case SolutionElement.ActionType.Move:
                         st += $"Move from {s.start.x},{s.start.y} to {s.end.x},{s.end.y}\n";
+                        break;
+                    case SolutionElement.ActionType.ToggleLight:
+                        st += $"Toggle light at {s.start.x},{s.start.y}\n";
                         break;
                     case SolutionElement.ActionType.Rotate:
                         break;
@@ -313,7 +366,6 @@ public class Puzzle : MonoBehaviour
                     {
                         currentTiles[x, y].SetImage(null);
                     }
-                    currentTiles[x, y].SetLight(true);
                 }
             }
         }
@@ -356,5 +408,10 @@ public class Puzzle : MonoBehaviour
         }
 
         Debug.Log(str);
+    }
+
+    public PuzzleState GetCurrentState()
+    {
+        return currentState;
     }
 }

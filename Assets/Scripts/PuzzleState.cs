@@ -16,31 +16,39 @@ public class PuzzleState
     class PuzzleElement
     {
         public Vector2Int   originalPosition;
+        public bool         lightState;
         public bool         immoveable;
 
-        public PuzzleElement(Vector2Int originalPosition)
+        public PuzzleElement(Vector2Int originalPosition, bool lightState)
         {
             this.originalPosition = originalPosition;
+            this.lightState = lightState;
 
             immoveable = false;
         }
 
         public PuzzleElement Clone()
         {
-            return new PuzzleElement(originalPosition);
+            return new PuzzleElement(originalPosition, lightState);
         }
     };
+
+    public enum NeighborhoodType { VonNeumann, Moore };
 
     private PuzzleType          puzzleType;
     private Vector2Int          gridSize;
     private bool                hasImage;
+    private NeighborhoodType    neighborhoodType;
+    private int                 neighborhoodDistance;
     private PuzzleElement[,]    state;
 
-    public PuzzleState(PuzzleType puzzleType, Vector2Int gridSize, bool hasImage)
+    public PuzzleState(PuzzleType puzzleType, Vector2Int gridSize, bool hasImage, NeighborhoodType neighborhoodType, int neighborhoodDistance)
     {
         this.gridSize = gridSize;
         this.puzzleType = puzzleType;
         this.hasImage = hasImage;
+        this.neighborhoodType = neighborhoodType;
+        this.neighborhoodDistance = neighborhoodDistance;
 
         state = new PuzzleElement[gridSize.x, gridSize.y];
     }
@@ -51,7 +59,7 @@ public class PuzzleState
         {
             for (int x = 0; x < gridSize.x; x++)
             {
-                state[x, y] = new PuzzleElement(new Vector2Int(x, y));
+                state[x, y] = new PuzzleElement(new Vector2Int(x, y), true);
             }
         }
     }
@@ -120,6 +128,11 @@ public class PuzzleState
         return state[x, y].immoveable;
     }
 
+    public bool isLightOn(int x, int y)
+    {
+        return state[x, y].lightState;
+    }
+
     public bool IsSame(PuzzleState currentState)
     {
         if (puzzleType != currentState.puzzleType) return false;
@@ -134,6 +147,21 @@ public class PuzzleState
                 {
                     return false;
                 }
+
+                if ((state[x, y] != null) && (currentState.state[x, y] != null))
+                {
+                    if (((puzzleType & PuzzleType.Sliding) != 0) && (hasImage))
+                    {
+                        if (state[x, y].originalPosition != currentState.state[x, y].originalPosition) return false;
+                    }
+
+                    if ((puzzleType & PuzzleType.LightsOut) != 0)
+                    {
+                        {
+                            if (state[x, y].lightState != currentState.state[x, y].lightState) return false;
+                        }
+                    }
+                }
             }
         }
 
@@ -142,7 +170,7 @@ public class PuzzleState
 
     public PuzzleState Clone()
     {
-        var ret = new PuzzleState(puzzleType, gridSize, hasImage);
+        var ret = new PuzzleState(puzzleType, gridSize, hasImage, neighborhoodType, neighborhoodDistance);
         for (int y = 0; y < gridSize.y; y++)
         {
             for (int x = 0; x < gridSize.x; x++)
@@ -188,6 +216,38 @@ public class PuzzleState
             }
         }
 
+        if ((puzzleType & PuzzleType.LightsOut) != 0)
+        {
+            // All lights must be on
+            for (int y = 0; y < gridSize.y; y++)
+            {
+                for (int x = 0; x < gridSize.x; x++)
+                {
+                    if (state[x, y] != null)
+                    {
+                        if (!state[x, y].lightState) return false;
+                    }
+                }
+            }
+        }
+
         return true;
+    }
+
+    internal void ToggleLight(Vector2Int gridPos)
+    {
+        for (int y = gridPos.y - neighborhoodDistance; y <= gridPos.y + neighborhoodDistance; y++)
+        {
+            if ((y < 0) || (y >= gridSize.y)) continue;
+            for (int x = gridPos.x - neighborhoodDistance; x <= gridPos.x + neighborhoodDistance; x++)
+            {
+                if ((x < 0) || (x >= gridSize.x)) continue;
+
+                if ((neighborhoodType == NeighborhoodType.VonNeumann) &&
+                    (x != gridPos.x) && (y != gridPos.y)) continue;
+
+                state[x, y].lightState = !state[x, y].lightState;
+            }
+        }
     }
 }

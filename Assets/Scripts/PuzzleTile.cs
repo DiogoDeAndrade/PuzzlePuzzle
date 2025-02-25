@@ -20,6 +20,7 @@ public class PuzzleTile : MonoBehaviour
     Puzzle          owner;
     SpriteRenderer  baseSpriteRenderer;
     bool            immoveable = false;
+    Vector2Int      originalGridPos;
 
     private void Start()
     {
@@ -29,10 +30,13 @@ public class PuzzleTile : MonoBehaviour
 
         tileSize = owner.tileSize;
         offset = owner.worldOffset;
+        originalGridPos = gridPos;
     }
 
     private void Update()
-    {        
+    {
+        var currentState = owner.GetCurrentState();
+
         if (immoveable)
         {
             baseSpriteRenderer.color = immoveableColor;
@@ -53,6 +57,9 @@ public class PuzzleTile : MonoBehaviour
         {
             baseSpriteRenderer.color = normalColor;
         }
+
+        lightSprite.enabled = owner.isLightsOut;
+        lightSprite.sprite = (currentState.isLightOn(originalGridPos.x, originalGridPos.y)) ? (lightOnSprite) : (lightOffSprite);
     }
 
     public void MoveTo(Vector2Int gridPos, float time)
@@ -85,12 +92,5 @@ public class PuzzleTile : MonoBehaviour
         if (imageSpriteRenderer == null) return;
         imageSpriteRenderer.enabled = (sprite != null);
         imageSpriteRenderer.sprite = sprite;
-    }
-
-    public void SetLight(bool b)
-    {
-        if (owner == null) owner = GetComponentInParent<Puzzle>();
-        lightSprite.enabled = owner.isLightsOut;
-        lightSprite.sprite = (b) ? (lightOnSprite) : (lightOffSprite);
     }
 }
