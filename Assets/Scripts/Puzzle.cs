@@ -120,10 +120,19 @@ public class Puzzle : MonoBehaviour
                 // Ok sound
 
                 // Get actual object
-                currentTiles[gridPos.x, gridPos.y].MoveTo(neighbour, animationTime);
+                var movementTween = currentTiles[gridPos.x, gridPos.y].MoveTo(neighbour, animationTime);
                 currentTiles[neighbour.x, neighbour.y] = currentTiles[gridPos.x, gridPos.y];
                 currentTiles[gridPos.x, gridPos.y] = null;
                 currentState.Swap(gridPos, neighbour);
+
+                if ((isLightsOut) && (movementTween != null))
+                {
+                    // When movement finishes, toggle light
+                    movementTween.Done(() =>
+                    {
+                        currentState.ToggleLight(neighbour);
+                    });
+                }
             }
             else
             {
@@ -183,7 +192,7 @@ public class Puzzle : MonoBehaviour
         currentState = new PuzzleState(puzzleType, gridSize, baseImage != null, neightborhoodType, neighborhoodDistance);
         currentState.Identity();
 
-        if ((puzzleType & PuzzleType.Sliding) != 0)
+        if (isSliding)
         {
             for (int i = 0; i < unmoveablePieceCount; i++)
             {
@@ -223,7 +232,7 @@ public class Puzzle : MonoBehaviour
         // Start from initial state
         prevStates = new() { currentState.Clone() };
 
-        if ((puzzleType & PuzzleType.Sliding) != 0)
+        if (isSliding)
         {
             for (int i = 0; i < shuffleAmmount; i++)
             {
@@ -233,6 +242,7 @@ public class Puzzle : MonoBehaviour
                     var gridPos = currentState.GetRandomGridPos(randomGenerator, true, false);
                     currentState.GetEmptyNeighbour(gridPos, out var neighbour);
 
+                    if (isLightsOut) currentState.ToggleLight(gridPos);
                     currentState.Swap(gridPos, neighbour);
 
                     // Check if state already exists in previous states
@@ -249,6 +259,7 @@ public class Puzzle : MonoBehaviour
                     {
                         // This state has already existed, we need to undo what we did and try again
                         currentState.Swap(gridPos, neighbour);
+                        if (isLightsOut) currentState.ToggleLight(gridPos);
 
                         nTries++;
                         continue;
@@ -269,7 +280,7 @@ public class Puzzle : MonoBehaviour
                 }
             }
         }
-        else if ((puzzleType & PuzzleType.LightsOut) != 0)
+        else if (isLightsOut)
         {
             // It's a else if because the lights out + sliding is shuffled by the movement on the shuffling
             for (int i = 0; i < shuffleAmmount; i++)

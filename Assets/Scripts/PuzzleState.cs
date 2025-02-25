@@ -242,6 +242,7 @@ public class PuzzleState
             for (int x = gridPos.x - neighborhoodDistance; x <= gridPos.x + neighborhoodDistance; x++)
             {
                 if ((x < 0) || (x >= gridSize.x)) continue;
+                if (state[x, y] == null) continue;
 
                 if ((neighborhoodType == NeighborhoodType.VonNeumann) &&
                     (x != gridPos.x) && (y != gridPos.y)) continue;

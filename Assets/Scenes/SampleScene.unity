@@ -3656,10 +3656,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 726b151e51fc4f346868dbb459283937, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  puzzleType: 2
+  puzzleType: 3
   gridSize: {x: 5, y: 5}
   shuffle: 1
-  shuffleAmmount: 8
+  shuffleAmmount: 25
   randomSeed: 0
   seed: 309
   unmoveablePieceCount: 2

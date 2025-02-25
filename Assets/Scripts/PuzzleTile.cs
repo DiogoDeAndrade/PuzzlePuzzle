@@ -59,16 +59,18 @@ public class PuzzleTile : MonoBehaviour
         }
 
         lightSprite.enabled = owner.isLightsOut;
-        lightSprite.sprite = (currentState.isLightOn(originalGridPos.x, originalGridPos.y)) ? (lightOnSprite) : (lightOffSprite);
+        lightSprite.sprite = (currentState.isLightOn(gridPos.x, gridPos.y)) ? (lightOnSprite) : (lightOffSprite);
     }
 
-    public void MoveTo(Vector2Int gridPos, float time)
+    public Tweener.BaseInterpolator MoveTo(Vector2Int gridPos, float time)
     {
         var targetPos = GetWorldPos(gridPos);
 
-        transform.MoveToWorld(targetPos, time, "TileMove").EaseFunction(Ease.Sqrt);
+        var ret = transform.MoveToWorld(targetPos, time, "TileMove").EaseFunction(Ease.Sqrt);
 
         this.gridPos = gridPos;
+
+        return ret;
     }
 
     Vector3 GetWorldPos(Vector2Int gridPos)
