@@ -3,9 +3,6 @@ using System.Collections.Generic;
 using NaughtyAttributes;
 using UnityEngine;
 using TMPro;
-using UnityEngine.U2D;
-using UnityEngine.Rendering.RenderGraphModule;
-using static UnityEngine.RuleTile.TilingRuleOutput;
 
 public class Puzzle : MonoBehaviour
 {

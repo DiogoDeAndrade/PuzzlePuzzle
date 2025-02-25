@@ -1,6 +1,5 @@
 using System;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 [Flags]
 public enum PuzzleType
@@ -33,7 +32,7 @@ public class PuzzleState
         }
     };
 
-    public enum NeighborhoodType { VonNeumann, Moore };
+    public enum NeighborhoodType { VonNeumann, Moore, Cross };
 
     private PuzzleType          puzzleType;
     private Vector2Int          gridSize;
@@ -244,8 +243,20 @@ public class PuzzleState
                 if ((x < 0) || (x >= gridSize.x)) continue;
                 if (state[x, y] == null) continue;
 
-                if ((neighborhoodType == NeighborhoodType.VonNeumann) &&
-                    (x != gridPos.x) && (y != gridPos.y)) continue;
+                switch (neighborhoodType)
+                {
+                    case NeighborhoodType.VonNeumann:
+                        int d = Mathf.Abs(x - gridPos.x) + Mathf.Abs(y - gridPos.y);
+                        if (d > neighborhoodDistance) continue;
+                        break;
+                    case NeighborhoodType.Moore:
+                        break;
+                    case NeighborhoodType.Cross:
+                        if ((x != gridPos.x) && (y != gridPos.y)) continue;
+                        break;
+                    default:
+                        break;
+                }
 
                 state[x, y].lightState = !state[x, y].lightState;
             }
