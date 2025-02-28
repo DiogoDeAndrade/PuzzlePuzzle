@@ -10,11 +10,9 @@ This month, the theme is "Lights Out".
 
 ## Todo
 
-- Pipemania
-  - Combine pipemania with sliding puzzle
+- Rhythm game
+  - ???
 - Polish
-  - Entry/exit point of pipemania
-  - Background objects
   - Puzzle in/out
   - Sounds
     - Move success sound
