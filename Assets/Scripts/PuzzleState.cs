@@ -17,18 +17,26 @@ public class PuzzleState
         public Vector2Int   originalPosition;
         public bool         lightState;
         public bool         immoveable;
+        public int          pieceRotation;
+        public int          pipeType;
+        public int          pipeRotation;
+        public bool         isFull;
 
-        public PuzzleElement(Vector2Int originalPosition, bool lightState)
+        public PuzzleElement(Vector2Int originalPosition, bool lightState, int pipeType, int pipeRotation, int pieceRotation, bool isFull)
         {
             this.originalPosition = originalPosition;
             this.lightState = lightState;
+            this.pipeType = pipeType;
+            this.pipeRotation = pipeRotation;
+            this.pieceRotation = pieceRotation;
+            this.isFull = isFull;
 
             immoveable = false;
         }
 
         public PuzzleElement Clone()
         {
-            return new PuzzleElement(originalPosition, lightState);
+            return new PuzzleElement(originalPosition, lightState, pipeType, pipeRotation, pieceRotation, isFull);
         }
     };
 
@@ -58,7 +66,7 @@ public class PuzzleState
         {
             for (int x = 0; x < gridSize.x; x++)
             {
-                state[x, y] = new PuzzleElement(new Vector2Int(x, y), true);
+                state[x, y] = new PuzzleElement(new Vector2Int(x, y), true, -1, 0, 0, false);
             }
         }
     }
@@ -76,6 +84,14 @@ public class PuzzleState
         }
     }
 
+    public void SetFull(int x, int y, bool b)
+    {
+        if (state[x, y] != null)
+        {
+            state[x, y].isFull = b;
+        }
+    }
+
     public void Swap(Vector2Int p1, Vector2Int p2)
     {
         var tmp = state[p2.x, p2.y];
@@ -83,7 +99,19 @@ public class PuzzleState
         state[p1.x, p1.y] = tmp;
     }
 
-    public Vector2Int GetRandomGridPos(System.Random randomGenerator, bool withEmptyNeighbour, bool allowImmobile)
+    public void Rotate(Vector2Int p, bool counterclockwise = true)
+    {
+        if (counterclockwise)
+            state[p.x, p.y].pieceRotation = (state[p.x, p.y].pieceRotation + 1) % 4;
+        else
+        {
+            state[p.x, p.y].pieceRotation--;
+            if (state[p.x, p.y].pieceRotation < 0)
+                state[p.x, p.y].pieceRotation = 3;
+        }
+    }
+
+    public Vector2Int GetRandomGridPos(System.Random randomGenerator, bool withEmptyNeighbour, bool allowImmobile, bool needPipe)
     {
         while (true)
         {
@@ -91,6 +119,7 @@ public class PuzzleState
             if (state[pos.x, pos.y] != null)
             {
                 if ((!allowImmobile) && (GetImmoveable(pos.x, pos.y))) continue;
+                if ((needPipe) && (GetPipeType(pos.x, pos.y) == -1)) continue;
 
                 if (withEmptyNeighbour)
                 {
@@ -132,6 +161,29 @@ public class PuzzleState
         return state[x, y].lightState;
     }
 
+    public void SetPipe(int x, int y, int pipeType, int rotation)
+    {
+        state[x, y].pipeType = pipeType;
+        state[x, y].pipeRotation = rotation;
+    }
+
+    public int GetPipeType(int x, int y)
+    {
+        return state[x, y].pipeType;
+    }
+
+    public int GetPipeRotation(int x, int y)
+    {
+        return state[x, y].pipeRotation;
+    }
+
+    public int GetPieceRotation(int x, int y)
+    {
+        return state[x, y].pieceRotation;
+    }
+
+    public int GetTotalRotation(int x, int y) => (GetPipeRotation(x, y) + GetPieceRotation(x, y)) % 4;
+
     public bool IsSame(PuzzleState currentState)
     {
         if (puzzleType != currentState.puzzleType) return false;
@@ -156,9 +208,14 @@ public class PuzzleState
 
                     if ((puzzleType & PuzzleType.LightsOut) != 0)
                     {
-                        {
-                            if (state[x, y].lightState != currentState.state[x, y].lightState) return false;
-                        }
+                        if (state[x, y].lightState != currentState.state[x, y].lightState) return false;
+                    }
+
+                    if ((puzzleType & PuzzleType.Pipemania) != 0)
+                    {
+                        if ((state[x, y].pipeType != currentState.state[x, y].pipeType) ||
+                            (state[x, y].pipeRotation != currentState.state[x, y].pipeRotation) ||
+                            (state[x, y].pieceRotation != currentState.state[x, y].pieceRotation)) return false;
                     }
                 }
             }
@@ -230,6 +287,22 @@ public class PuzzleState
             }
         }
 
+        if ((puzzleType & PuzzleType.Pipemania) != 0)
+        {
+            for (int y = 0; y < gridSize.y; y++)
+            {
+                for (int x = 0; x < gridSize.x; x++)
+                {
+                    if ((state[x, y] != null) && (state[x, y].pipeType >= 0))
+                    {
+                        if (!state[x, y].isFull) return false;
+
+                        if ((hasImage) && (state[x, y].pieceRotation != 0)) return false;
+                    }
+                }
+            }
+        }
+        
         return true;
     }
 

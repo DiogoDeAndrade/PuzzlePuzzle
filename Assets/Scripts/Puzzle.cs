@@ -1,8 +1,10 @@
-using System;
 using System.Collections.Generic;
 using NaughtyAttributes;
 using UnityEngine;
 using TMPro;
+using NUnit.Framework.Constraints;
+using System.IO;
+using static UnityEngine.RuleTile.TilingRuleOutput;
 
 public class Puzzle : MonoBehaviour
 {
@@ -24,6 +26,18 @@ public class Puzzle : MonoBehaviour
     private PuzzleState.NeighborhoodType    neightborhoodType = PuzzleState.NeighborhoodType.VonNeumann;
     [SerializeField, ShowIf(nameof(isLightsOut))]
     private int                 neighborhoodDistance = 1;
+    [SerializeField, ShowIf(nameof(isPipemania)), Header("Pipemania")]
+    private int                 numberOfOuts = 2;
+    [SerializeField, ShowIf(nameof(isPipemania))]
+    private int                 minPathLength = 5;    
+    [SerializeField, ShowIf(nameof(isPipemania))]
+    private int                 blockTiles = 10;
+    [SerializeField, ShowIf(nameof(isPipemania))]
+    private SpriteRenderer[]    drainPipes;
+    [SerializeField, ShowIf(nameof(isPipemania))]
+    private Sprite              emptyDrainPipe;
+    [SerializeField, ShowIf(nameof(isPipemania))]
+    private Sprite              fullDrainPipe;
     [SerializeField, Header("Interaction")]
     private float               interactionCooldown = 0.5f;
     [SerializeField]
@@ -36,6 +50,8 @@ public class Puzzle : MonoBehaviour
     private SpriteRenderer      puzzleBackground;
     [SerializeField]
     private TextMeshProUGUI     solutionText;
+    [SerializeField]
+    private SpriteRenderer      pumpSprite;
     [SerializeField]
     private Camera              _mainCamera;
 
@@ -53,6 +69,13 @@ public class Puzzle : MonoBehaviour
         public Vector2Int       end;
     }
 
+    class EndPoint
+    {
+        public Vector2Int       pos;
+        public int              rotation;
+        public SpriteRenderer   spriteRenderer;
+    }
+
     Vector2                 _tileSize;
     Vector2                 _worldOffset;
     PuzzleState             currentState;
@@ -62,6 +85,9 @@ public class Puzzle : MonoBehaviour
     System.Random           randomGenerator;
     float                   interactionTimer;
     bool                    completed = false;
+    Vector2Int              pipeStartPos;
+    int                     pipeStartRotation;
+    List<EndPoint>          pipeEndPos;
 
     public Vector2 tileSize => _tileSize;
     public Vector2 worldOffset => _worldOffset;
@@ -71,6 +97,7 @@ public class Puzzle : MonoBehaviour
 
     public bool isSliding => (puzzleType & PuzzleType.Sliding) != 0;
     public bool isLightsOut => (puzzleType & PuzzleType.LightsOut) != 0;
+    public bool isPipemania => (puzzleType & PuzzleType.Pipemania) != 0;
 
     void Start()
     {
@@ -101,6 +128,16 @@ public class Puzzle : MonoBehaviour
             {
                 HandleLeftClick();
             }
+            if (Input.GetMouseButtonDown(1))
+            {
+                HandleRightClick();
+            }
+
+            if (Input.GetKeyDown(KeyCode.R))
+            {
+                completed = false;
+                Build();
+            }
         }
     }
 
@@ -128,7 +165,12 @@ public class Puzzle : MonoBehaviour
                     movementTween.Done(() =>
                     {
                         currentState.ToggleLight(neighbour);
+                        UpdatePipes();
                     });
+                }
+                else
+                {
+                    movementTween.Done(() => UpdatePipes());
                 }
             }
             else
@@ -140,6 +182,32 @@ public class Puzzle : MonoBehaviour
         {
             // Ok sound
             currentState.ToggleLight(gridPos);
+        }
+
+        interactionTimer = interactionCooldown;
+    }
+
+    void HandleRightClick()
+    {
+        if (!GetMouseGridPos(out var gridPos)) return;
+
+        if (isPipemania)
+        {
+            if (currentState.HasElement(gridPos.x, gridPos.y))
+            {
+                if (currentState.GetPipeType(gridPos.x, gridPos.y) >= 0)
+                {
+                    var rotationTween = currentTiles[gridPos.x, gridPos.y].Rotate(animationTime);
+
+                    currentState.Rotate(gridPos);
+
+                    // When movement finishes, update pipes
+                    rotationTween.Done(() =>
+                    {
+                        UpdatePipes();
+                    });
+                }
+            }
         }
 
         interactionTimer = interactionCooldown;
@@ -165,11 +233,131 @@ public class Puzzle : MonoBehaviour
         return false;
     }
 
+    void UpdatePipes()
+    {
+        for (int y = 0; y < gridSize.y; y++)
+        {
+            for (int x = 0; x < gridSize.x; x++)
+            {
+                if (currentTiles[x, y] != null)
+                {
+                    currentTiles[x, y].SetFull(false);
+                    currentState.SetFull(x, y, false);
+                }
+            }
+        }
+        foreach (var p in pipeEndPos)
+        {
+            p.spriteRenderer.sprite = emptyDrainPipe;
+        }
+
+        UpdatePipes(pipeStartPos.x, pipeStartPos.y);
+    }
+
+    void UpdatePipes(int x, int y)
+    {
+        if (IsInsideGrid(x, y))
+        {
+            if (currentTiles[x, y].IsFull()) return;
+
+            currentTiles[x, y].SetFull(true);
+            currentState.SetFull(x, y, true);
+
+            byte mask = pipeBitmask[currentState.GetPipeType(x, y)];
+            mask = RotateMask(mask, currentState.GetTotalRotation(x, y));
+
+            UpdatePipes(x, y, mask);
+        }
+        else
+        {
+            // Check endpoints
+            if ((x == pipeStartPos.x) && (y == pipeStartPos.y))
+            {
+                // It's the start point, check bitmask
+                byte mask = 0b0001; // Mask for the pump
+                mask = RotateMask(mask, pipeStartRotation);
+
+                UpdatePipes(x, y, mask);
+            }
+        }
+    }
+
+    byte RotateMask(byte mask, int count)
+    {
+        byte ret = mask;
+        for (int i = 0; i < count; i++)
+        {
+            ret = (byte)(((ret & 0b0111) << 1) + ((ret & 0b1000) >> 3));
+        }
+        return ret;
+    }
+
+    void UpdatePipes(int x, int y, byte mask)
+    { 
+        for (int i = 0; i < 4; i++)
+        {
+            if ((mask & (1 << i)) != 0)
+            {
+                var newPos = UpdatePipePos(new Vector2Int(x, y), i);
+                if (IsInsideGrid(newPos.x, newPos.y))
+                {
+                    if (!currentState.HasElement(newPos.x, newPos.y)) continue;
+                    // Get rotation of this position
+                    var type = currentState.GetPipeType(newPos.x, newPos.y);
+                    if (type == -1) continue;
+                    var rotation = currentState.GetTotalRotation(newPos.x, newPos.y);
+                    var otherMask = RotateMask(pipeBitmask[type], rotation);
+                    var newI = (i + 2) % 4;
+                    if ((otherMask & (1 << newI)) != 0)
+                    {
+                        UpdatePipes(newPos.x, newPos.y);
+                    }
+                }
+                else
+                {
+                    foreach (var p in pipeEndPos)
+                    {
+                        if ((p.pos.x == newPos.x) && (p.pos.y == newPos.y))
+                        {
+                            p.spriteRenderer.sprite = fullDrainPipe;
+                        }
+                    }
+
+                }
+            }
+        }
+    }
+
+    bool IsInsideGrid(int x, int y)
+    {
+        return (x >= 0) && (y >= 0) && (x < gridSize.x) && (y < gridSize.y);
+    }
+
+    Vector2Int UpdatePipePos(Vector2Int pos, int rotation)
+    {
+        switch (rotation)
+        {
+            case 0: return new Vector2Int(pos.x + 1, pos.y);
+            case 1: return new Vector2Int(pos.x, pos.y + 1);
+            case 2: return new Vector2Int(pos.x - 1, pos.y);
+            case 3: return new Vector2Int(pos.x, pos.y - 1);
+            default:
+                break;
+        }
+        return pos;
+    }
+
     [Button("Build")]
     void Build()
     {
-        randomGenerator = new System.Random();
         if (!randomSeed) randomGenerator = new System.Random(seed);
+        else
+        {
+            // Get an actual random seed
+            int s = System.Environment.TickCount;
+            Debug.Log($"Current seed = {s}");
+            randomGenerator = new System.Random(s);            
+        }
 
         _tileSize = Vector2.zero;
         var sr = baseTilePrefab.GetComponent<SpriteRenderer>();
@@ -189,11 +377,19 @@ public class Puzzle : MonoBehaviour
         currentState = new PuzzleState(puzzleType, gridSize, baseImage != null, neightborhoodType, neighborhoodDistance);
         currentState.Identity();
 
+        if (isPipemania)
+        {
+            // Create pipe map
+            CreatePipeMap();
+        }
+
         if (isSliding)
         {
             for (int i = 0; i < unmoveablePieceCount; i++)
             {
                 var p = gridSize.RandomXY(randomGenerator);
+
+                if ((isPipemania) && (currentState.GetPipeType(p.x, p.y) >= 0)) continue;
 
                 currentState.SetImmoveable(p.x, p.y, true);
             }
@@ -202,18 +398,31 @@ public class Puzzle : MonoBehaviour
             if (baseImage)
             {
                 // Remove a piece from the puzzle
-                var clearPiece = gridSize.RandomXY(randomGenerator);
+                Vector2Int clearPiece;
+                do
+                {
+                    clearPiece = gridSize.RandomXY(randomGenerator);
+                }
+                while (currentState.GetPipeType(clearPiece.x, clearPiece.y) >= 0);
 
                 currentState.Clear(clearPiece.x, clearPiece.y);
             }
             else
             {
-                int rx = (gridSize.x % 2 != 0) ? (Mathf.FloorToInt(gridSize.x * 0.5f)) : 0;
-                int ry = (gridSize.y % 2 != 0) ? (Mathf.FloorToInt(gridSize.y * 0.5f)) : gridSize.y - 1;
+                Vector2Int clearPiece;
 
-                currentState.Clear(rx, ry);
+                do
+                {
+                    int rx = (gridSize.x % 2 != 0) ? (Mathf.FloorToInt(gridSize.x * 0.5f)) : 0;
+                    int ry = (gridSize.y % 2 != 0) ? (Mathf.FloorToInt(gridSize.y * 0.5f)) : gridSize.y - 1;
+                    clearPiece = new Vector2Int(rx, ry);
+                }
+                while (currentState.GetPipeType(clearPiece.x, clearPiece.y) >= 0);
+
+                currentState.Clear(clearPiece.x, clearPiece.y);
             }
         }
+
 
         if (shuffle)
         {
@@ -221,6 +430,112 @@ public class Puzzle : MonoBehaviour
         }
 
         CreatePieces();
+        UpdatePipes();
+    }
+
+    static readonly byte[] pipeBitmask = new byte[] { 0b1001, 0b0101, 0b1101, 0b1111 };
+
+    void CreatePipeMap()
+    {
+        int r = randomGenerator.Range(0, 3);
+        if (r == 0) { pipeStartPos = new Vector2Int(randomGenerator.Range(0, gridSize.x / 2), -1); pipeStartRotation = 1; }
+        else if (r == 1) { pipeStartPos = new Vector2Int(-1, randomGenerator.Range(0, gridSize.y)); pipeStartRotation = 0; }
+        else if (r == 2) { pipeStartPos = new Vector2Int(randomGenerator.Range(0, gridSize.x / 2), gridSize.y); pipeStartRotation = 3; }
+
+        var gs = new Vector2Int(gridSize.x + 2, gridSize.y + 2);
+
+        pipeEndPos = new();
+
+        var start = new Vector2Int(pipeStartPos.x + 1, pipeStartPos.y + 1);
+        var allPaths = new List<Vector2Int>();
+
+        for (int i = 0; i < numberOfOuts; i++)
+        {
+            int nTries = 0;
+            while (nTries < 50)
+            {
+                var pipeGrid = new int[gs.x, gs.y];
+                for (int k = 0; k < gs.x; k++) pipeGrid[k, 0] = 1;
+                for (int k = 0; k < gs.x; k++) pipeGrid[k, gs.y - 1] = 1;
+                for (int k = 0; k < gs.y; k++) pipeGrid[0, k] = 1;
+                for (int k = 0; k < gs.y; k++) pipeGrid[gs.x - 1, k] = 1;
+                for (int k = 0; k < blockTiles; k++)
+                {
+                    var bt = new Vector2Int(randomGenerator.Range(0, gs.x), randomGenerator.Range(0, gs.y));
+                    pipeGrid[bt.x, bt.y] = 1;
+                }
+
+                r = randomGenerator.Range(0, 4);
+                int er = 0;
+                Vector2Int o = Vector2Int.zero;
+                if (r == 0) { o = new Vector2Int(gs.x - 1, randomGenerator.Range(0, gs.y)); er = 2; }
+                else if (r == 1) { o = new Vector2Int(randomGenerator.Range(0, gs.x), gs.y - 1); er = 3; }
+                else if (r == 2) { o = new Vector2Int(0, randomGenerator.Range(0, gs.y)); er = 0; }
+                else if (r == 4) { o = new Vector2Int(randomGenerator.Range(0, gs.x), 0); er = 1; }
+
+                pipeGrid[start.x, start.y] = pipeGrid[o.x, o.y] = 0;
+
+                var path = AStar.GetPath(pipeGrid, start, o);
+
+                pipeGrid[start.x, start.y] = pipeGrid[o.x, o.y] = 1;
+
+                if ((path != null) && (path.Count > minPathLength))
+                {
+                    allPaths.AddRange(path);
+
+                    pipeEndPos.Add(new EndPoint {
+                        pos = new Vector2Int(o.x - 1, o.y - 1),
+                        rotation = er
+                    });
+                    break;
+                }
+
+                nTries++;
+            }
+        }
+
+        foreach (var p in allPaths)
+        {
+            if (p == start) continue;
+            bool isEnd = false;
+            foreach (var e in pipeEndPos)
+            {
+                if ((e.pos.x == p.x - 1) &&
+                    (e.pos.y == p.y - 1))
+                {
+                    isEnd = true;
+                    break;
+                }
+            }
+            if (isEnd) continue;
+
+            byte bmask = 0;
+            if (allPaths.Contains(new Vector2Int(p.x + 1, p.y))) bmask |= 0b0001;
+            if (allPaths.Contains(new Vector2Int(p.x, p.y + 1))) bmask |= 0b0010;
+            if (allPaths.Contains(new Vector2Int(p.x - 1, p.y))) bmask |= 0b0100;
+            if (allPaths.Contains(new Vector2Int(p.x, p.y - 1))) bmask |= 0b1000;
+
+            int pipeType = -1;
+            int pipeRot = 0;
+            while (pipeRot < 4)
+            {
+                for (int j = pipeBitmask.Length - 1; j >= 0; j--)
+                {
+                    if (pipeBitmask[j] == bmask)
+                    {
+                        pipeType = j;
+                        break;
+                    }
+                }
+                if (pipeType != -1) break;
+
+                pipeRot++;
+                bmask = (byte)(((bmask & 0b0001) << 3) + (bmask >> 1));
+            }
+
+            if (pipeType != -1)
+                currentState.SetPipe(p.x - 1, p.y - 1, pipeType, pipeRot);
+        }
     }
 
     void Shuffle()
@@ -229,97 +544,153 @@ public class Puzzle : MonoBehaviour
         // Start from initial state
         prevStates = new() { currentState.Clone() };
 
-        if (isSliding)
+        List<int> shuffleOptions = new();
+        if (isSliding) { shuffleOptions.Add(0); }
+        else if (isLightsOut) { shuffleOptions.Add(1); }
+
+        if (isPipemania) shuffleOptions.Add(2);
+
+        for (int i = 0; i < shuffleAmmount; i++)
         {
-            for (int i = 0; i < shuffleAmmount; i++)
+            int opt = shuffleOptions.Random();
+
+            switch (opt)
             {
-                int nTries = 0;
-                while (nTries < 10)
-                {
-                    var gridPos = currentState.GetRandomGridPos(randomGenerator, true, false);
-                    currentState.GetEmptyNeighbour(gridPos, out var neighbour);
-
-                    if (isLightsOut) currentState.ToggleLight(gridPos);
-                    currentState.Swap(gridPos, neighbour);
-
-                    // Check if state already exists in previous states
-                    bool alreadySeen = false;
-                    foreach (var prevState in prevStates)
+                case 0:
                     {
-                        if (prevState.IsSame(currentState))
+                        // Move sliding piece
+                        int nTries = 0;
+                        while (nTries < 10)
                         {
-                            alreadySeen = true;
+                            var gridPos = currentState.GetRandomGridPos(randomGenerator, true, false, false);
+                            currentState.GetEmptyNeighbour(gridPos, out var neighbour);
+
+                            if (isLightsOut) currentState.ToggleLight(gridPos);
+                            currentState.Swap(gridPos, neighbour);
+
+                            // Check if state already exists in previous states
+                            bool alreadySeen = false;
+                            foreach (var prevState in prevStates)
+                            {
+                                if (prevState.IsSame(currentState))
+                                {
+                                    alreadySeen = true;
+                                    break;
+                                }
+                            }
+                            if (alreadySeen)
+                            {
+                                // This state has already existed, we need to undo what we did and try again
+                                currentState.Swap(gridPos, neighbour);
+                                if (isLightsOut) currentState.ToggleLight(gridPos);
+
+                                nTries++;
+                                continue;
+                            }
+
+                            prevStates.Add(currentState.Clone());
+
+                            SolutionElement solutionElement = new()
+                            {
+                                action = SolutionElement.ActionType.Move,
+                                start = neighbour,
+                                end = gridPos,
+                            };
+
+                            solution.Add(solutionElement);
+
                             break;
                         }
                     }
-                    if (alreadySeen)
-                    {
-                        // This state has already existed, we need to undo what we did and try again
-                        currentState.Swap(gridPos, neighbour);
-                        if (isLightsOut) currentState.ToggleLight(gridPos);
-
-                        nTries++;
-                        continue;
-                    }
-
-                    prevStates.Add(currentState.Clone());
-
-                    SolutionElement solutionElement = new()
-                    {
-                        action = SolutionElement.ActionType.Move,
-                        start = neighbour,
-                        end = gridPos,
-                    };
-
-                    solution.Add(solutionElement);
-
                     break;
-                }
-            }
-        }
-        else if (isLightsOut)
-        {
-            // It's a else if because the lights out + sliding is shuffled by the movement on the shuffling
-            for (int i = 0; i < shuffleAmmount; i++)
-            {
-                int nTries = 0;
-                while (nTries < 10)
-                {
-                    var gridPos = currentState.GetRandomGridPos(randomGenerator, false, true);
-
-                    currentState.ToggleLight(gridPos);
-
-                    // Check if state already exists in previous states
-                    bool alreadySeen = false;
-                    foreach (var prevState in prevStates)
+                case 1:
                     {
-                        if (prevState.IsSame(currentState))
+                        // Turn on/off light
+                        int nTries = 0;
+                        while (nTries < 10)
                         {
-                            alreadySeen = true;
+                            var gridPos = currentState.GetRandomGridPos(randomGenerator, false, true, false);
+
+                            currentState.ToggleLight(gridPos);
+
+                            // Check if state already exists in previous states
+                            bool alreadySeen = false;
+                            foreach (var prevState in prevStates)
+                            {
+                                if (prevState.IsSame(currentState))
+                                {
+                                    alreadySeen = true;
+                                    break;
+                                }
+                            }
+                            if (alreadySeen)
+                            {
+                                // This state has already existed, we need to undo what we did and try again
+                                currentState.ToggleLight(gridPos);
+
+                                nTries++;
+                                continue;
+                            }
+
+                            prevStates.Add(currentState.Clone());
+
+                            SolutionElement solutionElement = new()
+                            {
+                                action = SolutionElement.ActionType.ToggleLight,
+                                start = gridPos
+                            };
+
+                            solution.Add(solutionElement);
+
                             break;
                         }
                     }
-                    if (alreadySeen)
-                    {
-                        // This state has already existed, we need to undo what we did and try again
-                        currentState.ToggleLight(gridPos);
-
-                        nTries++;
-                        continue;
-                    }
-
-                    prevStates.Add(currentState.Clone());
-
-                    SolutionElement solutionElement = new()
-                    {
-                        action = SolutionElement.ActionType.ToggleLight,
-                        start = gridPos
-                    };
-
-                    solution.Add(solutionElement);
-
                     break;
-                }
+                case 2:
+                    {
+                        // Rotate piece
+                        int nTries = 0;
+                        while (nTries < 10)
+                        {
+                            var gridPos = currentState.GetRandomGridPos(randomGenerator, false, false, true);
+
+                            currentState.Rotate(gridPos, false);
+
+                            // Check if state already exists in previous states
+                            bool alreadySeen = false;
+                            foreach (var prevState in prevStates)
+                            {
+                                if (prevState.IsSame(currentState))
+                                {
+                                    alreadySeen = true;
+                                    break;
+                                }
+                            }
+                            if (alreadySeen)
+                            {
+                                // This state has already existed, we need to undo what we did and try again
+                                currentState.Rotate(gridPos, true);
+
+                                nTries++;
+                                continue;
+                            }
+
+                            prevStates.Add(currentState.Clone());
+
+                            SolutionElement solutionElement = new()
+                            {
+                                action = SolutionElement.ActionType.Rotate,
+                                start = gridPos
+                            };
+
+                            solution.Add(solutionElement);
+
+                            break;
+                        }
+                    }
+                    break;
+                default:
+                    break;
             }
         }
 
@@ -339,6 +710,7 @@ public class Puzzle : MonoBehaviour
                         st += $"Toggle light at {s.start.x},{s.start.y}\n";
                         break;
                     case SolutionElement.ActionType.Rotate:
+                        st += $"Rotate piece at {s.start.x},{s.start.y}\n";
                         break;
                     default:
                         break;
@@ -366,7 +738,8 @@ public class Puzzle : MonoBehaviour
                     currentTiles[x, y] = Instantiate(baseTilePrefab, transform);
                     currentTiles[x, y].gridPos = new Vector2Int(x, y);
                     currentTiles[x, y].name = $"Piece {index++}";
-                    currentTiles[x, y].transform.position = new Vector3(x * _tileSize.x + _worldOffset.x + _tileSize.x * 0.5f, y * _tileSize.y + _worldOffset.y + _tileSize.y * 0.5f, 0.0f);
+                    currentTiles[x, y].transform.position = GetWorldPos(x, y);
+                    currentTiles[x, y].transform.rotation = Quaternion.Euler(0, 0, currentState.GetPieceRotation(x, y) * 90.0f);
                     currentTiles[x, y].SetImmoveable(currentState.GetImmoveable(x, y));
                     if (baseImage)
                     {
@@ -384,9 +757,35 @@ public class Puzzle : MonoBehaviour
                     {
                         currentTiles[x, y].SetImage(null);
                     }
+                    currentTiles[x, y].SetPipe(currentState.GetPipeType(x, y), currentState.GetPipeRotation(x, y));
                 }
             }
         }
+
+        if (pumpSprite)
+        {
+            pumpSprite.enabled = isPipemania;
+            pumpSprite.transform.position = GetWorldPos(pipeStartPos.x, pipeStartPos.y);
+            pumpSprite.transform.rotation = Quaternion.Euler(0, 0, pipeStartRotation * 90.0f);
+        }
+
+        for (int i = 0; i < pipeEndPos.Count; i++)
+        {
+            var d = pipeEndPos[i];
+            drainPipes[i].gameObject.SetActive(true);
+            drainPipes[i].transform.position = GetWorldPos(d.pos.x, d.pos.y);
+            drainPipes[i].transform.rotation = Quaternion.Euler(0, 0, d.rotation * 90.0f);
+            d.spriteRenderer = drainPipes[i];
+        }
+        for (int i = pipeEndPos.Count; i < drainPipes.Length; i++)
+        {
+            drainPipes[i].gameObject.SetActive(false);
+        }
+    }
+
+    Vector3 GetWorldPos(int x, int y)
+    {
+        return new Vector3(x * _tileSize.x + _worldOffset.x + _tileSize.x * 0.5f, y * _tileSize.y + _worldOffset.y + _tileSize.y * 0.5f, 0.0f);
     }
 
     [Button("Clear")]

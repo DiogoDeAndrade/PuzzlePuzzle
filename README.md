@@ -11,12 +11,7 @@ This month, the theme is "Lights Out".
 ## Todo
 
 - Pipemania
-  - Build puzzle
-  - Shuffle puzzle
-  - Rotate piece
-  - Check solution
-  - No rotation pieces
-  - Combine pipemania with sliding puzzle/lights out
+  - Combine pipemania with sliding puzzle
 - Polish
   - Entry/exit point of pipemania
   - Background objects

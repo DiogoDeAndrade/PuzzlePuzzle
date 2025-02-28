@@ -1,3 +1,4 @@
+using NaughtyAttributes.Test;
 using System;
 using UnityEngine;
 
@@ -11,6 +12,8 @@ public class PuzzleTile : MonoBehaviour
     [SerializeField] private Sprite         lightOnSprite;
     [SerializeField] private Sprite         lightOffSprite;
     [SerializeField] private SpriteRenderer immoveableSprite;
+    [SerializeField] private SpriteRenderer pipeSprite;
+    [SerializeField] private Sprite[]       pipeSprites;
 
 
     public Vector2Int gridPos;
@@ -21,6 +24,9 @@ public class PuzzleTile : MonoBehaviour
     SpriteRenderer  baseSpriteRenderer;
     bool            immoveable = false;
     Vector2Int      originalGridPos;
+    int             pipeType = -1;
+    bool            full;
+    int             pipeRotation = 0;
 
     private void Start()
     {
@@ -31,6 +37,8 @@ public class PuzzleTile : MonoBehaviour
         tileSize = owner.tileSize;
         offset = owner.worldOffset;
         originalGridPos = gridPos;
+
+        UpdatePipe(false);
     }
 
     private void Update()
@@ -73,6 +81,16 @@ public class PuzzleTile : MonoBehaviour
         return ret;
     }
 
+    // Rotates 90 degrees counter-clockwise
+    public Tweener.BaseInterpolator Rotate(float time)
+    {
+        var targetRotation = transform.rotation * Quaternion.Euler(0, 0, 90);
+
+        var ret = transform.RotateTo(targetRotation, time, "TileRotate").EaseFunction(Ease.Sqrt);
+
+        return ret;
+    }
+
     Vector3 GetWorldPos(Vector2Int gridPos)
     {
         return new Vector3((gridPos.x + 0.5f) * tileSize.x + offset.x, (gridPos.y + 0.5f) * tileSize.y + offset.y, 0.0f);
@@ -94,5 +112,31 @@ public class PuzzleTile : MonoBehaviour
         if (imageSpriteRenderer == null) return;
         imageSpriteRenderer.enabled = (sprite != null);
         imageSpriteRenderer.sprite = sprite;
+    }
+
+    public void SetPipe(int pipeType, int rotation)
+    {
+        this.pipeType = pipeType;
+        this.pipeRotation = rotation;        
+        UpdatePipe(true);
+    }
+
+    public void SetFull(bool full)
+    {
+        this.full = full;
+        UpdatePipe(false);
+    }
+
+    public bool IsFull() => full;
+
+    void UpdatePipe(bool updateRotation)
+    {
+        if (pipeSprite == null) return;
+        pipeSprite.enabled = (pipeType >= 0);
+        int offset = (full) ? (4) : (0);
+        if (pipeType >= 0) pipeSprite.sprite = pipeSprites[pipeType + offset];
+
+        if (updateRotation)
+            pipeSprite.transform.localRotation = Quaternion.Euler(0, 0, pipeRotation * 90.0f);
     }
 }
