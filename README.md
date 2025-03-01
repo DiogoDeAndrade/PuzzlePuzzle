@@ -11,7 +11,8 @@ This month, the theme is "Lights Out".
 ## Todo
 
 - Rhythm game
-  - ???
+  - With lights out
+  - With pipemania
 - Polish
   - Puzzle in/out
   - Sounds
@@ -28,6 +29,7 @@ This month, the theme is "Lights Out".
 
 ## Sound
 
+- [In The Middle Of July Music Loop](https://freesound.org/people/rhodesmas/sounds/323545/) by [rhodesmas](https://freesound.org/people/rhodesmas/), licensed through the [CC-BY 3.0] license.
 - Everything else done by [Diogo de Andrade], licensed through the [CC0] license.
 
 ## Code

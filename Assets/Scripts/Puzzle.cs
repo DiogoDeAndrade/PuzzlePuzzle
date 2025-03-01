@@ -5,6 +5,8 @@ using TMPro;
 using NUnit.Framework.Constraints;
 using System.IO;
 using static UnityEngine.RuleTile.TilingRuleOutput;
+using UnityEngine.Audio;
+using System;
 
 public class Puzzle : MonoBehaviour
 {
@@ -38,6 +40,14 @@ public class Puzzle : MonoBehaviour
     private Sprite              emptyDrainPipe;
     [SerializeField, ShowIf(nameof(isPipemania))]
     private Sprite              fullDrainPipe;
+    [SerializeField, ShowIf(nameof(isRhythm)), Header("Rhythm")]
+    private AudioSource         musicTrackSrc;
+    [SerializeField, ShowIf(nameof(isRhythm))]
+    private int                 bpm = 120;
+    [SerializeField, ShowIf(nameof(isRhythm))]
+    private float               beatThreshold = 0.1f;
+    [SerializeField, ShowIf(nameof(isRhythm))]
+    private bool                undoLastOnBeatFail;
     [SerializeField, Header("Interaction")]
     private float               interactionCooldown = 0.5f;
     [SerializeField]
@@ -88,6 +98,9 @@ public class Puzzle : MonoBehaviour
     Vector2Int              pipeStartPos;
     int                     pipeStartRotation;
     List<EndPoint>          pipeEndPos;
+    float                   prevSoundTimeSamples;
+    float                   beatTime;
+    List<SolutionElement>   undoBuffer;
 
     public Vector2 tileSize => _tileSize;
     public Vector2 worldOffset => _worldOffset;
@@ -98,6 +111,7 @@ public class Puzzle : MonoBehaviour
     public bool isSliding => (puzzleType & PuzzleType.Sliding) != 0;
     public bool isLightsOut => (puzzleType & PuzzleType.LightsOut) != 0;
     public bool isPipemania => (puzzleType & PuzzleType.Pipemania) != 0;
+    public bool isRhythm=> (puzzleType & PuzzleType.Rhythm) != 0;
 
     void Start()
     {
@@ -108,7 +122,38 @@ public class Puzzle : MonoBehaviour
     {
         if (completed)
         {
+            musicTrackSrc.FadeTo(0.0f, 0.5f);
             return;
+        }
+
+        if ((musicTrackSrc) && (isRhythm))
+        {
+            if (!musicTrackSrc.isPlaying)
+            {
+                musicTrackSrc.Play();
+                musicTrackSrc.volume = 0.0f;
+                musicTrackSrc.FadeTo(1.0f, 0.5f);
+                prevSoundTimeSamples = musicTrackSrc.timeSamples;
+            }
+            else
+            {
+                float prevTimeSeconds = (float)prevSoundTimeSamples / musicTrackSrc.clip.frequency;
+                float currTimeSeconds = (float)musicTrackSrc.timeSamples / musicTrackSrc.clip.frequency;
+
+                int prevBeat = Mathf.FloorToInt(prevTimeSeconds * bpm / 60.0f);
+                int currBeat = Mathf.FloorToInt(currTimeSeconds * bpm / 60.0f);
+
+                if (prevBeat != currBeat)
+                {
+                    // Animate
+                    puzzleBackground.transform.localScale = Vector3.one * 1.1f;
+                    puzzleBackground.transform.ScaleTo(Vector3.one, 0.75f * 60.0f / bpm);
+
+                    beatTime = Time.time;
+                }
+
+                prevSoundTimeSamples = musicTrackSrc.timeSamples;
+            }
         }
 
         if (interactionTimer > 0.0f)
@@ -147,30 +192,54 @@ public class Puzzle : MonoBehaviour
 
         if (isSliding)
         {
+            if (!currentState.HasElement(gridPos.x, gridPos.y)) return;
+
             if (currentState.GetImmoveable(gridPos.x, gridPos.y)) return;
 
             if (currentState.GetEmptyNeighbour(gridPos, out var neighbour))
             {
                 // Ok sound
-
-                // Get actual object
-                var movementTween = currentTiles[gridPos.x, gridPos.y].MoveTo(neighbour, animationTime);
-                currentTiles[neighbour.x, neighbour.y] = currentTiles[gridPos.x, gridPos.y];
-                currentTiles[gridPos.x, gridPos.y] = null;
-                currentState.Swap(gridPos, neighbour);
-
-                if ((isLightsOut) && (movementTween != null))
+                if (IsOnBeat(out float timeDistance))
                 {
-                    // When movement finishes, toggle light
-                    movementTween.Done(() =>
+                    // Get actual object
+                    var movementTween = currentTiles[gridPos.x, gridPos.y].MoveTo(neighbour, animationTime);
+                    currentTiles[neighbour.x, neighbour.y] = currentTiles[gridPos.x, gridPos.y];
+                    currentTiles[gridPos.x, gridPos.y] = null;
+                    currentState.Swap(gridPos, neighbour);
+
+                    if ((isLightsOut) && (movementTween != null))
                     {
-                        currentState.ToggleLight(neighbour);
-                        UpdatePipes();
-                    });
+                        // When movement finishes, toggle light
+                        movementTween.Done(() =>
+                        {
+                            currentState.ToggleLight(neighbour);
+                            UpdatePipes();
+                        });
+                    }
+                    else
+                    {
+                        movementTween.Done(() => UpdatePipes());
+                    }
+
+                    if (undoLastOnBeatFail)
+                    {
+                        undoBuffer.Add(new SolutionElement()
+                        {
+                            action = SolutionElement.ActionType.Move,
+                            start = gridPos,
+                            end = neighbour
+                        });
+                    }
                 }
                 else
                 {
-                    movementTween.Done(() => UpdatePipes());
+                    // Bad sound
+
+                    if (undoLastOnBeatFail)
+                    {
+                        var elem = undoBuffer.PopLast();
+                        Undo(elem);
+                    }
                 }
             }
             else
@@ -180,11 +249,45 @@ public class Puzzle : MonoBehaviour
         }
         else if (isLightsOut)
         {
-            // Ok sound
-            currentState.ToggleLight(gridPos);
+            // Ok sound 
+            if (IsOnBeat(out float timeDistance))
+            {
+                currentState.ToggleLight(gridPos);
+            }
+            else
+            {
+                // Bad sound
+
+                // Undo doesn't make sense, since undo in this case is just the same state as actually doing the operation
+            }
         }
 
         interactionTimer = interactionCooldown;
+    }
+
+    private void Undo(SolutionElement elem)
+    {
+        switch (elem.action)
+        {
+            case SolutionElement.ActionType.Move:
+                // Get actual object
+                if (isLightsOut)
+                {
+                    currentState.ToggleLight(elem.end);
+                }
+
+                var movementTween = currentTiles[elem.end.x, elem.end.y].MoveTo(elem.start, animationTime * 0.5f).Done(() => UpdatePipes());
+                currentTiles[elem.start.x, elem.start.y] = currentTiles[elem.end.x, elem.end.y];
+                currentTiles[elem.end.x, elem.end.y] = null;
+                currentState.Swap(elem.end, elem.start);
+                break;
+            case SolutionElement.ActionType.Rotate:
+                break;
+            case SolutionElement.ActionType.ToggleLight:
+                break;
+            default:
+                break;
+        }
     }
 
     void HandleRightClick()
@@ -213,6 +316,32 @@ public class Puzzle : MonoBehaviour
         interactionTimer = interactionCooldown;
     }
 
+    bool IsOnBeat(out float timeDistance)
+    {
+        float currTime = Time.time;
+
+        // Check if we are within the current beat window
+        float d1 = Mathf.Abs(currTime - beatTime);
+        if (d1 < beatThreshold)
+        {
+            timeDistance = d1;
+            return true;
+        }
+
+        // Check if we are slightly early but within the previous beat's tolerance window
+        float prevBeatTime = beatTime - (60.0f / bpm);
+        float d2 = Mathf.Abs(currTime - prevBeatTime);
+        if (d2 < beatThreshold)
+        {
+            timeDistance = d2;
+            return true;
+        }
+
+        timeDistance = Mathf.Min(d1, d2);
+
+        return false;
+    }
+
     bool GetMouseGridPos(out Vector2Int gridPos)
     {
         var worldPos = _mainCamera.ScreenToWorldPoint(Input.mousePosition);
@@ -235,6 +364,8 @@ public class Puzzle : MonoBehaviour
 
     void UpdatePipes()
     {
+        if (!isPipemania) return;
+
         for (int y = 0; y < gridSize.y; y++)
         {
             for (int x = 0; x < gridSize.x; x++)
@@ -431,6 +562,11 @@ public class Puzzle : MonoBehaviour
 
         CreatePieces();
         UpdatePipes();
+
+        if ((isRhythm) && (undoLastOnBeatFail))
+        {
+            undoBuffer = new();
+        }
     }
 
     static readonly byte[] pipeBitmask = new byte[] { 0b1001, 0b0101, 0b1101, 0b1111 };
@@ -769,7 +905,8 @@ public class Puzzle : MonoBehaviour
             pumpSprite.transform.rotation = Quaternion.Euler(0, 0, pipeStartRotation * 90.0f);
         }
 
-        for (int i = 0; i < pipeEndPos.Count; i++)
+        int outCount = ((pipeEndPos != null) ? (pipeEndPos.Count) : (0));
+        for (int i = 0; i < outCount; i++)
         {
             var d = pipeEndPos[i];
             drainPipes[i].gameObject.SetActive(true);
@@ -777,7 +914,7 @@ public class Puzzle : MonoBehaviour
             drainPipes[i].transform.rotation = Quaternion.Euler(0, 0, d.rotation * 90.0f);
             d.spriteRenderer = drainPipes[i];
         }
-        for (int i = pipeEndPos.Count; i < drainPipes.Length; i++)
+        for (int i = outCount; i < drainPipes.Length; i++)
         {
             drainPipes[i].gameObject.SetActive(false);
         }
