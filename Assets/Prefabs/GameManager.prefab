@@ -92,6 +92,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 9114db2bc979dc54ebd60e2e1e9cdabc, type: 2}
   - {fileID: 11400000, guid: ac3dcaf84f825e34791577915d93fe2e, type: 2}
   - {fileID: 11400000, guid: 5a9fa6db6c46cba4daee4bee1f85c7d1, type: 2}
+  levelDisplayTextTag: {fileID: 11400000, guid: ec14ac44a5a898246a4d0b39e49fadbe, type: 2}
   spawnPos: {fileID: 4881042034382928041}
   exitPos: {fileID: 7112069014391908441}
   puzzlePrefab: {fileID: 5227491694819372967, guid: 3103dd043cfb1d543bc792d3ff964143, type: 3}

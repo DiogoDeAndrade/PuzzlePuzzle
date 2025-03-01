@@ -174,11 +174,15 @@ public class Puzzle : MonoBehaviour
 
             if (Input.GetKeyDown(KeyCode.R))
             {
+                SoundManager.PlaySound(SoundType.PrimaryFX, badMoveSnd);
+
                 completed = false;
                 Build();
             }
             if (Input.GetKeyDown(KeyCode.S))
             {
+                SoundManager.PlaySound(SoundType.PrimaryFX, solutionOK);
+
                 completed = false;
                 GameManager.Instance.NextLevel();
             }

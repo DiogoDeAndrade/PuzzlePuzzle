@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
@@ -8,6 +9,8 @@ public class GameManager : MonoBehaviour
     private int         level;
     [SerializeField]
     private LevelDef[]  levels;
+    [SerializeField]
+    private Hypertag    levelDisplayTextTag;
     [SerializeField]
     private Transform   spawnPos;
     [SerializeField]
@@ -79,6 +82,16 @@ public class GameManager : MonoBehaviour
                     Destroy(prevPuzzle.gameObject);
                 });
             currentPuzzle = null;
+        }
+
+        if (levelDisplayTextTag)
+        {
+            var levelDisplayText = Hypertag.FindFirstObjectWithHypertag<TextMeshProUGUI>(levelDisplayTextTag);
+
+            if (levelDisplayText)
+            {
+                levelDisplayText.text = $"Level {level + 1}";
+            }
         }
 
         currentPuzzle = Instantiate(puzzlePrefab);
