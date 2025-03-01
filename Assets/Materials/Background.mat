@@ -57,13 +57,13 @@ Material:
     - _AlphaFactor: 0
     - _AnimationSpeed: 1
     - _EnableExternalAlpha: 0
-    - _NoisePower: 2
+    - _NoisePower: 3.11
     - _NoiseScale: 3
     - _ZWrite: 0
     m_Colors:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
-    - _Color1: {r: 0, g: 0.07477539, b: 0.0754717, a: 1}
-    - _Color2: {r: 0.18484662, g: 0.16487184, b: 0.5377358, a: 1}
+    - _Color1: {r: 0, g: 0, b: 0, a: 1}
+    - _Color2: {r: 0.16470589, g: 0.5372549, b: 0.5263122, a: 1}
     - _RendererColor: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
