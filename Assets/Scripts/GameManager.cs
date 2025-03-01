@@ -6,7 +6,7 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     private bool        autoStart = true;
     [SerializeField]
-    private int         level;
+    private int         _level;
     [SerializeField]
     private LevelDef[]  levels;
     [SerializeField]
@@ -17,6 +17,12 @@ public class GameManager : MonoBehaviour
     private Transform   exitPos;
     [SerializeField]
     private Puzzle      puzzlePrefab;
+
+    public int level
+    {
+        get { return _level; }
+        set { _level = value; }
+    }
 
     Puzzle currentPuzzle;
 
@@ -69,10 +75,10 @@ public class GameManager : MonoBehaviour
 
     public void Reset()
     {
-        level = 0;
+        _level = 0;
     }
 
-    void InitLevel()
+    public void InitLevel()
     {
         if (currentPuzzle)
         {
@@ -90,7 +96,7 @@ public class GameManager : MonoBehaviour
 
             if (levelDisplayText)
             {
-                levelDisplayText.text = $"Level {level + 1}";
+                levelDisplayText.text = $"Level {_level + 1}";
             }
         }
 
@@ -102,12 +108,14 @@ public class GameManager : MonoBehaviour
 
     public void NextLevel()
     {
-        level++;
+        _level++;
+        PlayerPrefs.SetInt("CurrentLevel", _level);
+        PlayerPrefs.Save();
         InitLevel();
     }
 
     LevelDef GetLevel()
     {
-        return levels[level];
+        return levels[_level];
     }
 }
