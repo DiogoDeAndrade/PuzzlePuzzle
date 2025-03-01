@@ -675,6 +675,12 @@ public class Puzzle : MonoBehaviour
             }
         }
 
+        if (allPaths.Count == 0)
+        {
+            // No pipes possible
+            levelDef.puzzleType &= ~(PuzzleType.Pipemania);
+        }
+
         foreach (var p in allPaths)
         {
             if (p == start) continue;
@@ -743,7 +749,11 @@ public class Puzzle : MonoBehaviour
                         int nTries = 0;
                         while (nTries < 10)
                         {
-                            var gridPos = currentState.GetRandomGridPos(randomGenerator, true, false, false);
+                            if (!currentState.GetRandomGridPos(randomGenerator, true, false, false, out var gridPos))
+                            {
+                                nTries++;
+                                continue;
+                            }
                             currentState.GetEmptyNeighbour(gridPos, out var neighbour);
 
                             if (isLightsOut) currentState.ToggleLight(gridPos);
@@ -790,7 +800,11 @@ public class Puzzle : MonoBehaviour
                         int nTries = 0;
                         while (nTries < 10)
                         {
-                            var gridPos = currentState.GetRandomGridPos(randomGenerator, false, true, false);
+                            if (!currentState.GetRandomGridPos(randomGenerator, false, true, false, out var gridPos))
+                            {
+                                nTries++;
+                                continue;
+                            }
 
                             currentState.ToggleLight(gridPos);
 
@@ -833,7 +847,11 @@ public class Puzzle : MonoBehaviour
                         int nTries = 0;
                         while (nTries < 10)
                         {
-                            var gridPos = currentState.GetRandomGridPos(randomGenerator, false, false, true);
+                            if (!currentState.GetRandomGridPos(randomGenerator, false, false, true, out var gridPos))
+                            {
+                                nTries++;
+                                continue;
+                            }
 
                             currentState.Rotate(gridPos, false);
 
@@ -903,6 +921,12 @@ public class Puzzle : MonoBehaviour
                 }
 
                 solutionText.text = st;
+
+                RectTransform parentRT = solutionText.transform.parent as RectTransform;
+                if (parentRT)
+                {
+                    parentRT.sizeDelta = new Vector2(parentRT.sizeDelta.x, solution.Count * 17 + 40);
+                }
             }
         }
     }

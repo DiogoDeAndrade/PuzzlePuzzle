@@ -1,24 +1,36 @@
 # PUZZLE PUZZLE
 
-![Title](Screenshots/title.png)
+![Title](Screenshots/Screenshot_1.png)
 
 Developed for the February [Game Creator's Club] at Lusofona University.
 This month, the theme is "Lights Out". 
 
 ## Game
 
+![Game](Screenshots/Screenshot_2.png)
+
+This game combines 3 of the most common puzzles - sliding blocks, pipemania and lights out.
+They can all be mixed at will, and they can even have a rhythm game component on top, for good measure!
+
+There are some hard-coded puzzles, but when they run out, the game just runs random puzzles.
+Press 'R' to restart any puzzle, you can see the solution by pressing the '?' button
+Press 'S' to skip a puzzle (cheat mode, this may be removed in the future, after the demo).
+
+![Game](Screenshots/Screenshot_3.png)
+![Game](Screenshots/Screenshot_4.png)
 
 ## Todo
 
-- Game flow
-  - Main menu
-  - Random levels
+- Build
+  - Itch.io
 
 ## Art
 
 - [Puzzle Pack 2](https://kenney.nl/assets/puzzle-pack-2) by [Kenney](https://kenney.nl), licensed through the [CC0] license.
 - Photo [Brown Wooden Cube on Gray Textile](https://www.pexels.com/photo/brown-wooden-cube-on-gray-textile-6469463/) by [Eva Bronzini](https://www.pexels.com/@eva-bronzini/), free to use.
 - Photo [Assorted-color Pencil Set](https://www.pexels.com/photo/assorted-color-pencil-set-459799/) by [Pixabay](https://www.pexels.com/@pixabay/), licensed through the [CC0] license.
+- Photo [Delicious Pancakes with Fresh Fruit Toppings](https://www.pexels.com/photo/delicious-pancakes-with-fresh-fruit-toppings-30911365/) by [Beyza Yalçın](https://www.pexels.com/@beyza-yalcin-153182170/), free to use.
+- Photo [Vibrant Jellyfish in Dark Ocean Waters](https://www.pexels.com/photo/vibrant-jellyfish-in-dark-ocean-waters-30835507/) by [Fotis Michalainas](https://www.pexels.com/@fotis-michalainas-2149881541/), free to use.
 - Everything else done by [Diogo de Andrade], licensed through the [CC0] license.
 
 ## Sound

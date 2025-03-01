@@ -77,25 +77,32 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 45bc4656f3950a34fb11527cce31c4c9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  autoStart: 1
-  level: 0
+  autoStart: 0
+  _level: 0
   levels:
   - {fileID: 11400000, guid: ac67a7b983a6c5140b5defafdfb773a7, type: 2}
   - {fileID: 11400000, guid: 28785638458dc6d48b1f682e8e822bc7, type: 2}
+  - {fileID: 11400000, guid: 3c191af4b9e511c479e5fc502abac1b6, type: 2}
   - {fileID: 11400000, guid: eebe9bb14449ec1489c8f962e920eaad, type: 2}
   - {fileID: 11400000, guid: b4d913170e1e5ab4cba83b92913d5d72, type: 2}
   - {fileID: 11400000, guid: 3ea6217614c60fb4d844ca04a8e4af31, type: 2}
-  - {fileID: 11400000, guid: 3c191af4b9e511c479e5fc502abac1b6, type: 2}
+  - {fileID: 11400000, guid: ac3dcaf84f825e34791577915d93fe2e, type: 2}
+  - {fileID: 11400000, guid: 5a9fa6db6c46cba4daee4bee1f85c7d1, type: 2}
   - {fileID: 11400000, guid: a323cf39b39dd0d4bae0230944a0f8d0, type: 2}
   - {fileID: 11400000, guid: f79ccd9538c9a9e459194e171b31f897, type: 2}
   - {fileID: 11400000, guid: 2371dcd588bc4674495af7308c0b51e5, type: 2}
   - {fileID: 11400000, guid: 9114db2bc979dc54ebd60e2e1e9cdabc, type: 2}
-  - {fileID: 11400000, guid: ac3dcaf84f825e34791577915d93fe2e, type: 2}
-  - {fileID: 11400000, guid: 5a9fa6db6c46cba4daee4bee1f85c7d1, type: 2}
   levelDisplayTextTag: {fileID: 11400000, guid: ec14ac44a5a898246a4d0b39e49fadbe, type: 2}
   spawnPos: {fileID: 4881042034382928041}
   exitPos: {fileID: 7112069014391908441}
   puzzlePrefab: {fileID: 5227491694819372967, guid: 3103dd043cfb1d543bc792d3ff964143, type: 3}
+  songs:
+  - {fileID: 8300000, guid: c23e9338a0efb964ead883c0571f6ee2, type: 3}
+  images:
+  - {fileID: 2800000, guid: 25457b8bbb9458e4499cd155dc0f643c, type: 3}
+  - {fileID: 2800000, guid: 0bc9421282653f44b83bfb28db7b2d43, type: 3}
+  - {fileID: 2800000, guid: fe472c7185cc1de4d81a8273901973c1, type: 3}
+  - {fileID: 2800000, guid: d019567f5efff2c48bdefae5b4ac66b5, type: 3}
 --- !u!1 &4862544485410865587
 GameObject:
   m_ObjectHideFlags: 0

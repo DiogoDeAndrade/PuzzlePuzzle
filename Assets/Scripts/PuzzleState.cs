@@ -111,11 +111,14 @@ public class PuzzleState
         }
     }
 
-    public Vector2Int GetRandomGridPos(System.Random randomGenerator, bool withEmptyNeighbour, bool allowImmobile, bool needPipe)
+    public bool GetRandomGridPos(System.Random randomGenerator, bool withEmptyNeighbour, bool allowImmobile, bool needPipe, out Vector2Int pos)
     {
-        while (true)
+        int nTries = 0;
+        while (nTries < 100)
         {
-            var pos = gridSize.RandomXY(randomGenerator);
+            nTries++;
+
+            pos = gridSize.RandomXY(randomGenerator);
             if (state[pos.x, pos.y] != null)
             {
                 if ((!allowImmobile) && (GetImmoveable(pos.x, pos.y))) continue;
@@ -123,11 +126,14 @@ public class PuzzleState
 
                 if (withEmptyNeighbour)
                 {
-                    if (GetEmptyNeighbour(pos, out var neighbour)) return pos;
+                    if (GetEmptyNeighbour(pos, out var neighbour)) return true;
                 }
-                else return pos;
+                else return true;
             }
         }
+
+        pos = Vector2Int.zero;
+        return false;
     }
 
     public bool GetEmptyNeighbour(Vector2Int pos, out Vector2Int neighbour)
