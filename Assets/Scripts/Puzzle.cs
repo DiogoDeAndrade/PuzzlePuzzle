@@ -267,6 +267,8 @@ public class Puzzle : MonoBehaviour
 
     private void Undo(SolutionElement elem)
     {
+        if (elem == null) return;
+
         switch (elem.action)
         {
             case SolutionElement.ActionType.Move:
@@ -282,8 +284,14 @@ public class Puzzle : MonoBehaviour
                 currentState.Swap(elem.end, elem.start);
                 break;
             case SolutionElement.ActionType.Rotate:
+                var rotationTween = currentTiles[elem.start.x, elem.start.y].Rotate(animationTime, false).Done(() => UpdatePipes());
+
+                currentState.Rotate(elem.start, false);
+
                 break;
             case SolutionElement.ActionType.ToggleLight:
+                // Undo of toggle light by itself doesn't make much sense, since it reverts to the same state as actually
+                // doing it
                 break;
             default:
                 break;
@@ -300,15 +308,32 @@ public class Puzzle : MonoBehaviour
             {
                 if (currentState.GetPipeType(gridPos.x, gridPos.y) >= 0)
                 {
-                    var rotationTween = currentTiles[gridPos.x, gridPos.y].Rotate(animationTime);
-
-                    currentState.Rotate(gridPos);
-
-                    // When movement finishes, update pipes
-                    rotationTween.Done(() =>
+                    if (IsOnBeat(out float timeDistance))
                     {
-                        UpdatePipes();
-                    });
+                        var rotationTween = currentTiles[gridPos.x, gridPos.y].Rotate(animationTime).Done(() => UpdatePipes());
+
+                        currentState.Rotate(gridPos);
+
+                        if (undoLastOnBeatFail)
+                        {
+                            undoBuffer.Add(new SolutionElement()
+                            {
+                                action = SolutionElement.ActionType.Rotate,
+                                start = gridPos
+                            });
+                        }
+                    }
+                    else
+                    {
+                        // Bad sound
+
+                        if (undoLastOnBeatFail)
+                        {
+                            var elem = undoBuffer.PopLast();
+                            Undo(elem);
+                        }
+
+                    }
                 }
             }
         }

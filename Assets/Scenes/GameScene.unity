@@ -9690,7 +9690,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 726b151e51fc4f346868dbb459283937, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  puzzleType: 9
+  puzzleType: 12
   gridSize: {x: 5, y: 5}
   shuffle: 1
   shuffleAmmount: 5

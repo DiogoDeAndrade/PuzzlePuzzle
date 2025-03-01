@@ -82,9 +82,9 @@ public class PuzzleTile : MonoBehaviour
     }
 
     // Rotates 90 degrees counter-clockwise
-    public Tweener.BaseInterpolator Rotate(float time)
+    public Tweener.BaseInterpolator Rotate(float time, bool counterclockwise = true)
     {
-        var targetRotation = transform.rotation * Quaternion.Euler(0, 0, 90);
+        var targetRotation = transform.rotation * Quaternion.Euler(0, 0, (counterclockwise) ? (90) : (-90));
 
         var ret = transform.RotateTo(targetRotation, time, "TileRotate").EaseFunction(Ease.Sqrt);
 

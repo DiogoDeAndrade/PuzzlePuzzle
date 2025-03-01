@@ -10,9 +10,10 @@ This month, the theme is "Lights Out".
 
 ## Todo
 
-- Rhythm game
-  - With lights out
-  - With pipemania
+- Level def structure
+- Game flow
+  - Main menu
+  - Puzzle sequences
 - Polish
   - Puzzle in/out
   - Sounds
