@@ -16,7 +16,7 @@ public class Puzzle : MonoBehaviour
     [SerializeField, Header("References")]
     private SpriteRenderer      puzzleBackground;
     [SerializeField]
-    private TextMeshProUGUI     solutionText;
+    private Hypertag            solutionTextTag;
     [SerializeField]
     private SpriteRenderer      pumpSprite;
     [SerializeField]
@@ -73,18 +73,39 @@ public class Puzzle : MonoBehaviour
     public bool isComplete => completed;
     public Camera mainCamera => _mainCamera;
 
-    public bool isSliding => (levelDef.puzzleType & PuzzleType.Sliding) != 0;
-    public bool isLightsOut => (levelDef.puzzleType & PuzzleType.LightsOut) != 0;
-    public bool isPipemania => (levelDef.puzzleType & PuzzleType.Pipemania) != 0;
-    public bool isRhythm=> (levelDef.puzzleType & PuzzleType.Rhythm) != 0;
+    public bool isSliding => (levelDef != null) && (levelDef.puzzleType & PuzzleType.Sliding) != 0;
+    public bool isLightsOut => (levelDef != null) && (levelDef.puzzleType & PuzzleType.LightsOut) != 0;
+    public bool isPipemania => (levelDef != null) && (levelDef.puzzleType & PuzzleType.Pipemania) != 0;
+    public bool isRhythm=> (levelDef != null) && (levelDef.puzzleType & PuzzleType.Rhythm) != 0;
 
     void Start()
     {
-        Build();
+        InitLevel(levelDef);
+
+        if (_mainCamera == null)
+        {
+            _mainCamera = FindFirstObjectByType<Camera>(FindObjectsInactive.Exclude);
+        }
+    }
+
+    public void InitLevel(LevelDef levelDef)
+    {
+        this.levelDef = levelDef;
+
+        if (levelDef == null)
+        {
+            Clear();
+        }
+        else
+        {
+            Build();
+        }
     }
 
     void Update()
     {
+        if (currentState == null) return;
+
         if (completed)
         {
             musicTrackSrc.FadeTo(0.0f, 0.5f);
@@ -130,8 +151,8 @@ public class Puzzle : MonoBehaviour
         {
             if (currentState.CheckSolution())
             {
-                Debug.Log("Puzzle completed!");
                 completed = true;
+                GameManager.Instance.NextLevel();
                 return;
             }
 
@@ -829,28 +850,33 @@ public class Puzzle : MonoBehaviour
 
         solution.Reverse();
 
-        if (solutionText)
+        if (solutionTextTag)
         {
-            var st = "";
-            foreach (var s in solution)
-            {
-                switch (s.action)
-                {
-                    case SolutionElement.ActionType.Move:
-                        st += $"Move from {s.start.x},{s.start.y} to {s.end.x},{s.end.y}\n";
-                        break;
-                    case SolutionElement.ActionType.ToggleLight:
-                        st += $"Toggle light at {s.start.x},{s.start.y}\n";
-                        break;
-                    case SolutionElement.ActionType.Rotate:
-                        st += $"Rotate piece at {s.start.x},{s.start.y}\n";
-                        break;
-                    default:
-                        break;
-                }
-            }
+            var solutionText = Hypertag.FindFirstObjectWithHypertag<TextMeshProUGUI>(solutionTextTag);
 
-            solutionText.text = st;
+            if (solutionText)
+            {
+                var st = "";
+                foreach (var s in solution)
+                {
+                    switch (s.action)
+                    {
+                        case SolutionElement.ActionType.Move:
+                            st += $"Move from {s.start.x},{s.start.y} to {s.end.x},{s.end.y}\n";
+                            break;
+                        case SolutionElement.ActionType.ToggleLight:
+                            st += $"Toggle light at {s.start.x},{s.start.y}\n";
+                            break;
+                        case SolutionElement.ActionType.Rotate:
+                            st += $"Rotate piece at {s.start.x},{s.start.y}\n";
+                            break;
+                        default:
+                            break;
+                    }
+                }
+
+                solutionText.text = st;
+            }
         }
     }
 
@@ -871,8 +897,8 @@ public class Puzzle : MonoBehaviour
                     currentTiles[x, y] = Instantiate(baseTilePrefab, transform);
                     currentTiles[x, y].gridPos = new Vector2Int(x, y);
                     currentTiles[x, y].name = $"Piece {index++}";
-                    currentTiles[x, y].transform.position = GetWorldPos(x, y);
-                    currentTiles[x, y].transform.rotation = Quaternion.Euler(0, 0, currentState.GetPieceRotation(x, y) * 90.0f);
+                    currentTiles[x, y].transform.localPosition = GetWorldPos(x, y);
+                    currentTiles[x, y].transform.localRotation = Quaternion.Euler(0, 0, currentState.GetPieceRotation(x, y) * 90.0f);
                     currentTiles[x, y].SetImmoveable(currentState.GetImmoveable(x, y));
                     if (levelDef.baseImage)
                     {
@@ -898,8 +924,8 @@ public class Puzzle : MonoBehaviour
         if (pumpSprite)
         {
             pumpSprite.enabled = isPipemania;
-            pumpSprite.transform.position = GetWorldPos(pipeStartPos.x, pipeStartPos.y);
-            pumpSprite.transform.rotation = Quaternion.Euler(0, 0, pipeStartRotation * 90.0f);
+            pumpSprite.transform.localPosition = GetWorldPos(pipeStartPos.x, pipeStartPos.y);
+            pumpSprite.transform.localRotation = Quaternion.Euler(0, 0, pipeStartRotation * 90.0f);
         }
 
         int outCount = ((pipeEndPos != null) ? (pipeEndPos.Count) : (0));
@@ -907,8 +933,8 @@ public class Puzzle : MonoBehaviour
         {
             var d = pipeEndPos[i];
             drainPipes[i].gameObject.SetActive(true);
-            drainPipes[i].transform.position = GetWorldPos(d.pos.x, d.pos.y);
-            drainPipes[i].transform.rotation = Quaternion.Euler(0, 0, d.rotation * 90.0f);
+            drainPipes[i].transform.localPosition = GetWorldPos(d.pos.x, d.pos.y);
+            drainPipes[i].transform.localRotation = Quaternion.Euler(0, 0, d.rotation * 90.0f);
             d.spriteRenderer = drainPipes[i];
         }
         for (int i = outCount; i < drainPipes.Length; i++)

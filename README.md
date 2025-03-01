@@ -12,10 +12,8 @@ This month, the theme is "Lights Out".
 
 - Game flow
   - Main menu
-  - Puzzle sequences
 - Polish
   - Help display
-  - Puzzle in/out
   - Sounds
     - Move success sound
     - Move fail sound
