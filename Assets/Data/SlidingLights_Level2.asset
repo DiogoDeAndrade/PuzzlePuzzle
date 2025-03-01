@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 619eb507d2d6b964ab61e837ed174798, type: 3}
+  m_Name: SlidingLights_Level2
+  m_EditorClassIdentifier: 
+  puzzleType: 3
+  gridSize: {x: 3, y: 3}
+  shuffle: 1
+  shuffleAmmount: 5
+  randomSeed: 0
+  seed: 19260
+  unmoveablePieceCount: 0
+  neightborhoodType: 0
+  neighborhoodDistance: 1
+  numberOfOuts: 2
+  minPathLength: 5
+  blockTiles: 10
+  musicTrackClip: {fileID: 0}
+  bpm: 120
+  beatThreshold: 0.1
+  undoLastOnBeatFail: 0
+  baseImage: {fileID: 2800000, guid: 25457b8bbb9458e4499cd155dc0f643c, type: 3}

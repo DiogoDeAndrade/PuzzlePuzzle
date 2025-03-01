@@ -2,39 +2,24 @@ using System.Collections.Generic;
 using NaughtyAttributes;
 using UnityEngine;
 using TMPro;
-using NUnit.Framework.Constraints;
-using System.IO;
-using static UnityEngine.RuleTile.TilingRuleOutput;
-using UnityEngine.Audio;
-using System;
 
 public class Puzzle : MonoBehaviour
 {
-    [SerializeField, Header("Puzzle Parameters")] 
-    private PuzzleType          puzzleType = PuzzleType.Sliding;
-    [SerializeField] 
-    private Vector2Int          gridSize = new Vector2Int(2, 2);
+    [SerializeField, Header("Puzzle Parameters"), Expandable]
+    private LevelDef            levelDef;
+    [SerializeField, Header("Interaction")]
+    private float               interactionCooldown = 0.5f;
     [SerializeField]
-    private bool                shuffle;
-    [SerializeField, ShowIf(nameof(shuffle))]
-    private int                 shuffleAmmount = 3;
+    private float               animationTime = 0.25f;
+    [SerializeField, Header("Tiles")] 
+    private PuzzleTile          baseTilePrefab;
+    [SerializeField, Header("References")]
+    private SpriteRenderer      puzzleBackground;
     [SerializeField]
-    private bool                randomSeed;
-    [SerializeField, HideIf(nameof(randomSeed))]
-    private int                 seed;
-    [SerializeField, ShowIf(nameof(isSliding)), Header("Sliding")]
-    private int                 unmoveablePieceCount;
-    [SerializeField, ShowIf(nameof(isLightsOut)), Header("Lights Out")]
-    private PuzzleState.NeighborhoodType    neightborhoodType = PuzzleState.NeighborhoodType.VonNeumann;
-    [SerializeField, ShowIf(nameof(isLightsOut))]
-    private int                 neighborhoodDistance = 1;
-    [SerializeField, ShowIf(nameof(isPipemania)), Header("Pipemania")]
-    private int                 numberOfOuts = 2;
-    [SerializeField, ShowIf(nameof(isPipemania))]
-    private int                 minPathLength = 5;    
-    [SerializeField, ShowIf(nameof(isPipemania))]
-    private int                 blockTiles = 10;
-    [SerializeField, ShowIf(nameof(isPipemania))]
+    private TextMeshProUGUI     solutionText;
+    [SerializeField]
+    private SpriteRenderer      pumpSprite;
+    [SerializeField]
     private SpriteRenderer[]    drainPipes;
     [SerializeField, ShowIf(nameof(isPipemania))]
     private Sprite              emptyDrainPipe;
@@ -42,26 +27,6 @@ public class Puzzle : MonoBehaviour
     private Sprite              fullDrainPipe;
     [SerializeField, ShowIf(nameof(isRhythm)), Header("Rhythm")]
     private AudioSource         musicTrackSrc;
-    [SerializeField, ShowIf(nameof(isRhythm))]
-    private int                 bpm = 120;
-    [SerializeField, ShowIf(nameof(isRhythm))]
-    private float               beatThreshold = 0.1f;
-    [SerializeField, ShowIf(nameof(isRhythm))]
-    private bool                undoLastOnBeatFail;
-    [SerializeField, Header("Interaction")]
-    private float               interactionCooldown = 0.5f;
-    [SerializeField]
-    private float               animationTime = 0.25f;
-    [SerializeField, Header("Tiles")] 
-    private PuzzleTile          baseTilePrefab;
-    [SerializeField]
-    private Texture2D           baseImage;
-    [SerializeField, Header("References")]
-    private SpriteRenderer      puzzleBackground;
-    [SerializeField]
-    private TextMeshProUGUI     solutionText;
-    [SerializeField]
-    private SpriteRenderer      pumpSprite;
     [SerializeField]
     private Camera              _mainCamera;
 
@@ -108,10 +73,10 @@ public class Puzzle : MonoBehaviour
     public bool isComplete => completed;
     public Camera mainCamera => _mainCamera;
 
-    public bool isSliding => (puzzleType & PuzzleType.Sliding) != 0;
-    public bool isLightsOut => (puzzleType & PuzzleType.LightsOut) != 0;
-    public bool isPipemania => (puzzleType & PuzzleType.Pipemania) != 0;
-    public bool isRhythm=> (puzzleType & PuzzleType.Rhythm) != 0;
+    public bool isSliding => (levelDef.puzzleType & PuzzleType.Sliding) != 0;
+    public bool isLightsOut => (levelDef.puzzleType & PuzzleType.LightsOut) != 0;
+    public bool isPipemania => (levelDef.puzzleType & PuzzleType.Pipemania) != 0;
+    public bool isRhythm=> (levelDef.puzzleType & PuzzleType.Rhythm) != 0;
 
     void Start()
     {
@@ -130,6 +95,7 @@ public class Puzzle : MonoBehaviour
         {
             if (!musicTrackSrc.isPlaying)
             {
+                musicTrackSrc.clip = levelDef.musicTrackClip;
                 musicTrackSrc.Play();
                 musicTrackSrc.volume = 0.0f;
                 musicTrackSrc.FadeTo(1.0f, 0.5f);
@@ -140,14 +106,14 @@ public class Puzzle : MonoBehaviour
                 float prevTimeSeconds = (float)prevSoundTimeSamples / musicTrackSrc.clip.frequency;
                 float currTimeSeconds = (float)musicTrackSrc.timeSamples / musicTrackSrc.clip.frequency;
 
-                int prevBeat = Mathf.FloorToInt(prevTimeSeconds * bpm / 60.0f);
-                int currBeat = Mathf.FloorToInt(currTimeSeconds * bpm / 60.0f);
+                int prevBeat = Mathf.FloorToInt(prevTimeSeconds * levelDef.bpm / 60.0f);
+                int currBeat = Mathf.FloorToInt(currTimeSeconds * levelDef.bpm / 60.0f);
 
                 if (prevBeat != currBeat)
                 {
                     // Animate
                     puzzleBackground.transform.localScale = Vector3.one * 1.1f;
-                    puzzleBackground.transform.ScaleTo(Vector3.one, 0.75f * 60.0f / bpm);
+                    puzzleBackground.transform.ScaleTo(Vector3.one, 0.75f * 60.0f / levelDef.bpm);
 
                     beatTime = Time.time;
                 }
@@ -221,7 +187,7 @@ public class Puzzle : MonoBehaviour
                         movementTween.Done(() => UpdatePipes());
                     }
 
-                    if (undoLastOnBeatFail)
+                    if (levelDef.undoLastOnBeatFail)
                     {
                         undoBuffer.Add(new SolutionElement()
                         {
@@ -235,7 +201,7 @@ public class Puzzle : MonoBehaviour
                 {
                     // Bad sound
 
-                    if (undoLastOnBeatFail)
+                    if (levelDef.undoLastOnBeatFail)
                     {
                         var elem = undoBuffer.PopLast();
                         Undo(elem);
@@ -314,7 +280,7 @@ public class Puzzle : MonoBehaviour
 
                         currentState.Rotate(gridPos);
 
-                        if (undoLastOnBeatFail)
+                        if (levelDef.undoLastOnBeatFail)
                         {
                             undoBuffer.Add(new SolutionElement()
                             {
@@ -327,7 +293,7 @@ public class Puzzle : MonoBehaviour
                     {
                         // Bad sound
 
-                        if (undoLastOnBeatFail)
+                        if (levelDef.undoLastOnBeatFail)
                         {
                             var elem = undoBuffer.PopLast();
                             Undo(elem);
@@ -343,20 +309,26 @@ public class Puzzle : MonoBehaviour
 
     bool IsOnBeat(out float timeDistance)
     {
+        if (!isRhythm)
+        {
+            timeDistance = 0.0f;
+            return true;
+        }
+
         float currTime = Time.time;
 
         // Check if we are within the current beat window
         float d1 = Mathf.Abs(currTime - beatTime);
-        if (d1 < beatThreshold)
+        if (d1 < levelDef.beatThreshold)
         {
             timeDistance = d1;
             return true;
         }
 
         // Check if we are slightly early but within the previous beat's tolerance window
-        float prevBeatTime = beatTime - (60.0f / bpm);
+        float prevBeatTime = beatTime - (60.0f / levelDef.bpm);
         float d2 = Mathf.Abs(currTime - prevBeatTime);
-        if (d2 < beatThreshold)
+        if (d2 < levelDef.beatThreshold)
         {
             timeDistance = d2;
             return true;
@@ -371,9 +343,9 @@ public class Puzzle : MonoBehaviour
     {
         var worldPos = _mainCamera.ScreenToWorldPoint(Input.mousePosition);
 
-        for (int y = 0; y < gridSize.y; y++)
+        for (int y = 0; y < levelDef.gridSize.y; y++)
         {
-            for (int x = 0; x < gridSize.x; x++)
+            for (int x = 0; x < levelDef.gridSize.x; x++)
             {
                 Rect rect = new Rect(x * _tileSize.x + _worldOffset.x, y * _tileSize.y + _worldOffset.y, _tileSize.x, _tileSize.y);
                 if (rect.Contains(worldPos))
@@ -391,9 +363,9 @@ public class Puzzle : MonoBehaviour
     {
         if (!isPipemania) return;
 
-        for (int y = 0; y < gridSize.y; y++)
+        for (int y = 0; y < levelDef.gridSize.y; y++)
         {
-            for (int x = 0; x < gridSize.x; x++)
+            for (int x = 0; x < levelDef.gridSize.x; x++)
             {
                 if (currentTiles[x, y] != null)
                 {
@@ -486,7 +458,7 @@ public class Puzzle : MonoBehaviour
 
     bool IsInsideGrid(int x, int y)
     {
-        return (x >= 0) && (y >= 0) && (x < gridSize.x) && (y < gridSize.y);
+        return (x >= 0) && (y >= 0) && (x < levelDef.gridSize.x) && (y < levelDef.gridSize.y);
     }
 
     Vector2Int UpdatePipePos(Vector2Int pos, int rotation)
@@ -506,7 +478,7 @@ public class Puzzle : MonoBehaviour
     [Button("Build")]
     void Build()
     {
-        if (!randomSeed) randomGenerator = new System.Random(seed);
+        if (!levelDef.randomSeed) randomGenerator = new System.Random(levelDef.seed);
         else
         {
             // Get an actual random seed
@@ -523,14 +495,14 @@ public class Puzzle : MonoBehaviour
             return;
         }
         _tileSize = sr.bounds.size;
-        _worldOffset = new Vector2(-gridSize.x * _tileSize.x * 0.5f, -gridSize.y * _tileSize.y * 0.5f);
+        _worldOffset = new Vector2(-levelDef.gridSize.x * _tileSize.x * 0.5f, -levelDef.gridSize.y * _tileSize.y * 0.5f);
 
         if (puzzleBackground)
         {
-            puzzleBackground.size = new Vector2(_tileSize.x * gridSize.x + 8, _tileSize.y * gridSize.y + 8);
+            puzzleBackground.size = new Vector2(_tileSize.x * levelDef.gridSize.x + 8, _tileSize.y * levelDef.gridSize.y + 8);
         }
 
-        currentState = new PuzzleState(puzzleType, gridSize, baseImage != null, neightborhoodType, neighborhoodDistance);
+        currentState = new PuzzleState(levelDef.puzzleType, levelDef.gridSize, levelDef.baseImage != null, levelDef.neightborhoodType, levelDef.neighborhoodDistance);
         currentState.Identity();
 
         if (isPipemania)
@@ -541,9 +513,9 @@ public class Puzzle : MonoBehaviour
 
         if (isSliding)
         {
-            for (int i = 0; i < unmoveablePieceCount; i++)
+            for (int i = 0; i < levelDef.unmoveablePieceCount; i++)
             {
-                var p = gridSize.RandomXY(randomGenerator);
+                var p = levelDef.gridSize.RandomXY(randomGenerator);
 
                 if ((isPipemania) && (currentState.GetPipeType(p.x, p.y) >= 0)) continue;
 
@@ -551,13 +523,13 @@ public class Puzzle : MonoBehaviour
             }
 
             // Remove a piece from the puzzle
-            if (baseImage)
+            if (levelDef.baseImage)
             {
                 // Remove a piece from the puzzle
                 Vector2Int clearPiece;
                 do
                 {
-                    clearPiece = gridSize.RandomXY(randomGenerator);
+                    clearPiece = levelDef.gridSize.RandomXY(randomGenerator);
                 }
                 while (currentState.GetPipeType(clearPiece.x, clearPiece.y) >= 0);
 
@@ -569,8 +541,8 @@ public class Puzzle : MonoBehaviour
 
                 do
                 {
-                    int rx = (gridSize.x % 2 != 0) ? (Mathf.FloorToInt(gridSize.x * 0.5f)) : 0;
-                    int ry = (gridSize.y % 2 != 0) ? (Mathf.FloorToInt(gridSize.y * 0.5f)) : gridSize.y - 1;
+                    int rx = (levelDef.gridSize.x % 2 != 0) ? (Mathf.FloorToInt(levelDef.gridSize.x * 0.5f)) : 0;
+                    int ry = (levelDef.gridSize.y % 2 != 0) ? (Mathf.FloorToInt(levelDef.gridSize.y * 0.5f)) : levelDef.gridSize.y - 1;
                     clearPiece = new Vector2Int(rx, ry);
                 }
                 while (currentState.GetPipeType(clearPiece.x, clearPiece.y) >= 0);
@@ -580,7 +552,7 @@ public class Puzzle : MonoBehaviour
         }
 
 
-        if (shuffle)
+        if (levelDef.shuffle)
         {
             Shuffle();
         }
@@ -588,7 +560,7 @@ public class Puzzle : MonoBehaviour
         CreatePieces();
         UpdatePipes();
 
-        if ((isRhythm) && (undoLastOnBeatFail))
+        if ((isRhythm) && (levelDef.undoLastOnBeatFail))
         {
             undoBuffer = new();
         }
@@ -599,18 +571,18 @@ public class Puzzle : MonoBehaviour
     void CreatePipeMap()
     {
         int r = randomGenerator.Range(0, 3);
-        if (r == 0) { pipeStartPos = new Vector2Int(randomGenerator.Range(0, gridSize.x / 2), -1); pipeStartRotation = 1; }
-        else if (r == 1) { pipeStartPos = new Vector2Int(-1, randomGenerator.Range(0, gridSize.y)); pipeStartRotation = 0; }
-        else if (r == 2) { pipeStartPos = new Vector2Int(randomGenerator.Range(0, gridSize.x / 2), gridSize.y); pipeStartRotation = 3; }
+        if (r == 0) { pipeStartPos = new Vector2Int(randomGenerator.Range(0, levelDef.gridSize.x / 2), -1); pipeStartRotation = 1; }
+        else if (r == 1) { pipeStartPos = new Vector2Int(-1, randomGenerator.Range(0, levelDef.gridSize.y)); pipeStartRotation = 0; }
+        else if (r == 2) { pipeStartPos = new Vector2Int(randomGenerator.Range(0, levelDef.gridSize.x / 2), levelDef.gridSize.y); pipeStartRotation = 3; }
 
-        var gs = new Vector2Int(gridSize.x + 2, gridSize.y + 2);
+        var gs = new Vector2Int(levelDef.gridSize.x + 2, levelDef.gridSize.y + 2);
 
         pipeEndPos = new();
 
         var start = new Vector2Int(pipeStartPos.x + 1, pipeStartPos.y + 1);
         var allPaths = new List<Vector2Int>();
 
-        for (int i = 0; i < numberOfOuts; i++)
+        for (int i = 0; i < levelDef.numberOfOuts; i++)
         {
             int nTries = 0;
             while (nTries < 50)
@@ -620,7 +592,7 @@ public class Puzzle : MonoBehaviour
                 for (int k = 0; k < gs.x; k++) pipeGrid[k, gs.y - 1] = 1;
                 for (int k = 0; k < gs.y; k++) pipeGrid[0, k] = 1;
                 for (int k = 0; k < gs.y; k++) pipeGrid[gs.x - 1, k] = 1;
-                for (int k = 0; k < blockTiles; k++)
+                for (int k = 0; k < levelDef.blockTiles; k++)
                 {
                     var bt = new Vector2Int(randomGenerator.Range(0, gs.x), randomGenerator.Range(0, gs.y));
                     pipeGrid[bt.x, bt.y] = 1;
@@ -640,7 +612,7 @@ public class Puzzle : MonoBehaviour
 
                 pipeGrid[start.x, start.y] = pipeGrid[o.x, o.y] = 1;
 
-                if ((path != null) && (path.Count > minPathLength))
+                if ((path != null) && (path.Count > levelDef.minPathLength))
                 {
                     allPaths.AddRange(path);
 
@@ -711,7 +683,7 @@ public class Puzzle : MonoBehaviour
 
         if (isPipemania) shuffleOptions.Add(2);
 
-        for (int i = 0; i < shuffleAmmount; i++)
+        for (int i = 0; i < levelDef.shuffleAmmount; i++)
         {
             int opt = shuffleOptions.Random();
 
@@ -889,10 +861,10 @@ public class Puzzle : MonoBehaviour
         Clear();
 
         int index = 0;
-        currentTiles = new PuzzleTile[gridSize.x, gridSize.y];
-        for (int y = 0; y < gridSize.y; y++)
+        currentTiles = new PuzzleTile[levelDef.gridSize.x, levelDef.gridSize.y];
+        for (int y = 0; y < levelDef.gridSize.y; y++)
         {
-            for (int x = 0; x < gridSize.x; x++)
+            for (int x = 0; x < levelDef.gridSize.x; x++)
             {
                 if (currentState.HasElement(x, y))
                 {
@@ -902,15 +874,15 @@ public class Puzzle : MonoBehaviour
                     currentTiles[x, y].transform.position = GetWorldPos(x, y);
                     currentTiles[x, y].transform.rotation = Quaternion.Euler(0, 0, currentState.GetPieceRotation(x, y) * 90.0f);
                     currentTiles[x, y].SetImmoveable(currentState.GetImmoveable(x, y));
-                    if (baseImage)
+                    if (levelDef.baseImage)
                     {
                         var op = currentState.GetOriginalPosition(x, y);
                         float tw = tileSize.x;
                         float th = tileSize.y;
                         Rect uv = new Rect(op.x * tw, op.y * th, tw, th);
 
-                        Sprite sprite = Sprite.Create(baseImage, uv, new Vector2(0.5f, 0.5f), 1.0f);
-                        sprite.name = $"Custom Sprite ({baseImage.name}: {uv})";
+                        Sprite sprite = Sprite.Create(levelDef.baseImage, uv, new Vector2(0.5f, 0.5f), 1.0f);
+                        sprite.name = $"Custom Sprite ({levelDef.baseImage.name}: {uv})";
 
                         currentTiles[x, y].SetImage(sprite);
                     }
@@ -977,9 +949,9 @@ public class Puzzle : MonoBehaviour
     void ListPieces()
     {
         string str = "";
-        for (int y = 0; y < gridSize.y; y++)
+        for (int y = 0; y < levelDef.gridSize.y; y++)
         {
-            for (int x = 0; x < gridSize.x; x++)
+            for (int x = 0; x < levelDef.gridSize.x; x++)
             {
                 if (currentTiles[x, y] == null) str += $"({x}, {y}) = NULL\n";
                 else str += $"({x}, {y}) = {currentTiles[x, y].name}\n";

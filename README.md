@@ -10,11 +10,11 @@ This month, the theme is "Lights Out".
 
 ## Todo
 
-- Level def structure
 - Game flow
   - Main menu
   - Puzzle sequences
 - Polish
+  - Help display
   - Puzzle in/out
   - Sounds
     - Move success sound
