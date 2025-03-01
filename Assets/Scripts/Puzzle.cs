@@ -11,9 +11,15 @@ public class Puzzle : MonoBehaviour
     private float               interactionCooldown = 0.5f;
     [SerializeField]
     private float               animationTime = 0.25f;
-    [SerializeField, Header("Tiles")] 
-    private PuzzleTile          baseTilePrefab;
+    [SerializeField, Header("Sounds")] 
+    private AudioClip           goodMoveSnd;
+    [SerializeField] 
+    private AudioClip           badMoveSnd;
+    [SerializeField] 
+    private AudioClip           solutionOK;
     [SerializeField, Header("References")]
+    private PuzzleTile          baseTilePrefab;
+    [SerializeField]
     private SpriteRenderer      puzzleBackground;
     [SerializeField]
     private Hypertag            solutionTextTag;
@@ -151,6 +157,7 @@ public class Puzzle : MonoBehaviour
         {
             if (currentState.CheckSolution())
             {
+                SoundManager.PlaySound(SoundType.PrimaryFX, solutionOK);
                 completed = true;
                 GameManager.Instance.NextLevel();
                 return;
@@ -170,6 +177,11 @@ public class Puzzle : MonoBehaviour
                 completed = false;
                 Build();
             }
+            if (Input.GetKeyDown(KeyCode.S))
+            {
+                completed = false;
+                GameManager.Instance.NextLevel();
+            }
         }
     }
 
@@ -188,6 +200,8 @@ public class Puzzle : MonoBehaviour
                 // Ok sound
                 if (IsOnBeat(out float timeDistance))
                 {
+                    SoundManager.PlaySound(SoundType.PrimaryFX, goodMoveSnd, 0.7f, Random.Range(0.9f, 1.1f));
+
                     // Get actual object
                     var movementTween = currentTiles[gridPos.x, gridPos.y].MoveTo(neighbour, animationTime);
                     currentTiles[neighbour.x, neighbour.y] = currentTiles[gridPos.x, gridPos.y];
@@ -221,6 +235,7 @@ public class Puzzle : MonoBehaviour
                 else
                 {
                     // Bad sound
+                    SoundManager.PlaySound(SoundType.PrimaryFX, badMoveSnd, 0.7f, Random.Range(0.9f, 1.1f));
 
                     if (levelDef.undoLastOnBeatFail)
                     {
@@ -232,6 +247,7 @@ public class Puzzle : MonoBehaviour
             else
             {
                 // Bad sound
+                SoundManager.PlaySound(SoundType.PrimaryFX, badMoveSnd, 0.7f, Random.Range(0.9f, 1.1f));
             }
         }
         else if (isLightsOut)
@@ -239,10 +255,14 @@ public class Puzzle : MonoBehaviour
             // Ok sound 
             if (IsOnBeat(out float timeDistance))
             {
+                SoundManager.PlaySound(SoundType.PrimaryFX, goodMoveSnd, 0.7f, Random.Range(0.9f, 1.1f));
+
                 currentState.ToggleLight(gridPos);
             }
             else
             {
+                SoundManager.PlaySound(SoundType.PrimaryFX, badMoveSnd, 0.7f, Random.Range(0.9f, 1.1f));
+
                 // Bad sound
 
                 // Undo doesn't make sense, since undo in this case is just the same state as actually doing the operation
@@ -297,6 +317,8 @@ public class Puzzle : MonoBehaviour
                 {
                     if (IsOnBeat(out float timeDistance))
                     {
+                        SoundManager.PlaySound(SoundType.PrimaryFX, goodMoveSnd, 0.7f, Random.Range(0.9f, 1.1f));
+
                         var rotationTween = currentTiles[gridPos.x, gridPos.y].Rotate(animationTime).Done(() => UpdatePipes());
 
                         currentState.Rotate(gridPos);
@@ -313,6 +335,7 @@ public class Puzzle : MonoBehaviour
                     else
                     {
                         // Bad sound
+                        SoundManager.PlaySound(SoundType.PrimaryFX, goodMoveSnd, 0.7f, Random.Range(0.9f, 1.1f));
 
                         if (levelDef.undoLastOnBeatFail)
                         {

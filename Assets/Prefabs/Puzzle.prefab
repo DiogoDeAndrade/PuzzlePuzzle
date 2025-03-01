@@ -2564,6 +2564,9 @@ MonoBehaviour:
   levelDef: {fileID: 0}
   interactionCooldown: 0.25
   animationTime: 0.2
+  goodMoveSnd: {fileID: 8300000, guid: 02c320e0833eda941823dd1db98e1acc, type: 3}
+  badMoveSnd: {fileID: 8300000, guid: e250fb2cd27ac994d975f09ce8b22ddc, type: 3}
+  solutionOK: {fileID: 8300000, guid: 6c631627a37fca944b27c72dfd126d4b, type: 3}
   baseTilePrefab: {fileID: 8962880628696651692, guid: 76dae8efe2905ea49b584299800542b3, type: 3}
   puzzleBackground: {fileID: 7536351224888873219}
   solutionTextTag: {fileID: 11400000, guid: bca96f2d8f4ea0040903ac408520cf25, type: 2}

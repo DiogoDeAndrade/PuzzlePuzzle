@@ -12,12 +12,7 @@ This month, the theme is "Lights Out".
 
 - Game flow
   - Main menu
-- Polish
-  - Help display
-  - Sounds
-    - Move success sound
-    - Move fail sound
-    - Puzzle solved sound
+  - Random levels
 
 ## Art
 
@@ -28,6 +23,7 @@ This month, the theme is "Lights Out".
 
 ## Sound
 
+- [Game Start Sound](https://freesound.org/people/plasterbrain/sounds/243020/) by [plasterbrain](https://freesound.org/people/plasterbrain/), [CC0] license.
 - [In The Middle Of July Music Loop](https://freesound.org/people/rhodesmas/sounds/323545/) by [rhodesmas](https://freesound.org/people/rhodesmas/), licensed through the [CC-BY 3.0] license.
 - Everything else done by [Diogo de Andrade], licensed through the [CC0] license.
 

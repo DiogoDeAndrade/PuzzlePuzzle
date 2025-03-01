@@ -1,0 +1,128 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &835110233870507533
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7112069014391908441}
+  m_Layer: 0
+  m_Name: ExitPos
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7112069014391908441
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 835110233870507533}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: -1000, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2265813614033511699}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &2171802060706248452
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2265813614033511699}
+  - component: {fileID: 2866017659236913995}
+  m_Layer: 0
+  m_Name: GameManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2265813614033511699
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2171802060706248452}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 4881042034382928041}
+  - {fileID: 7112069014391908441}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2866017659236913995
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2171802060706248452}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 45bc4656f3950a34fb11527cce31c4c9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  autoStart: 1
+  level: 0
+  levels:
+  - {fileID: 11400000, guid: ac67a7b983a6c5140b5defafdfb773a7, type: 2}
+  - {fileID: 11400000, guid: 28785638458dc6d48b1f682e8e822bc7, type: 2}
+  - {fileID: 11400000, guid: eebe9bb14449ec1489c8f962e920eaad, type: 2}
+  - {fileID: 11400000, guid: b4d913170e1e5ab4cba83b92913d5d72, type: 2}
+  - {fileID: 11400000, guid: 3ea6217614c60fb4d844ca04a8e4af31, type: 2}
+  - {fileID: 11400000, guid: 3c191af4b9e511c479e5fc502abac1b6, type: 2}
+  - {fileID: 11400000, guid: a323cf39b39dd0d4bae0230944a0f8d0, type: 2}
+  - {fileID: 11400000, guid: f79ccd9538c9a9e459194e171b31f897, type: 2}
+  - {fileID: 11400000, guid: 2371dcd588bc4674495af7308c0b51e5, type: 2}
+  - {fileID: 11400000, guid: 9114db2bc979dc54ebd60e2e1e9cdabc, type: 2}
+  - {fileID: 11400000, guid: ac3dcaf84f825e34791577915d93fe2e, type: 2}
+  - {fileID: 11400000, guid: 5a9fa6db6c46cba4daee4bee1f85c7d1, type: 2}
+  spawnPos: {fileID: 4881042034382928041}
+  exitPos: {fileID: 7112069014391908441}
+  puzzlePrefab: {fileID: 5227491694819372967, guid: 3103dd043cfb1d543bc792d3ff964143, type: 3}
+--- !u!1 &4862544485410865587
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4881042034382928041}
+  m_Layer: 0
+  m_Name: SpawnPos
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4881042034382928041
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4862544485410865587}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -1500, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2265813614033511699}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
