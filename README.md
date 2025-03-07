@@ -19,10 +19,12 @@ Press 'S' to skip a puzzle (cheat mode, this may be removed in the future, after
 ![Game](Screenshots/Screenshot_3.png)
 ![Game](Screenshots/Screenshot_4.png)
 
-## Todo
+## To do
 
-- Build
-  - Itch.io
+- Button to skip puzzle (just own the fact that the game is a nightmare)
+- Lights on => Lights out
+- Change name of game to "Puzzle^3" or "BeatPuzzle^3"
+- Select better images for tile backgrounds
 
 ## Art
 
