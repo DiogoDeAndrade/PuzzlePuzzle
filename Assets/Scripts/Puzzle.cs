@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using NaughtyAttributes;
 using UnityEngine;
 using TMPro;
+using UC;
 
 public class Puzzle : MonoBehaviour
 {
@@ -140,7 +141,7 @@ public class Puzzle : MonoBehaviour
                 {
                     // Animate
                     puzzleBackground.transform.localScale = Vector3.one * 1.1f;
-                    puzzleBackground.transform.ScaleTo(Vector3.one, 0.75f * 60.0f / levelDef.bpm);
+                    puzzleBackground.transform.LocalScaleTo(Vector3.one, 0.75f * 60.0f / levelDef.bpm);
 
                     beatTime = Time.time;
                 }

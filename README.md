@@ -21,10 +21,16 @@ Press 'S' to skip a puzzle (cheat mode, this may be removed in the future, after
 
 ## To do
 
-- Button to skip puzzle (just own the fact that the game is a nightmare)
 - Lights on => Lights out
-- Change name of game to "Puzzle^3" or "BeatPuzzle^3"
-- Select better images for tile backgrounds
+- Change name of game to "Puzzle^3" or "BeatPuzzle^3" - rethink, if I add more stuff the name has to change
+- More images for tile backgrounds
+- More puzzles to combine (either in additional panels or in the same panel)
+- Add credits ingame
+- Remove rhythm game (don't believe it works)
+- Improve music (CC0 or Suno)
+- Improve itch.io page
+- Improve logo for game
+- Improved cursor
 
 ## Art
 

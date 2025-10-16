@@ -1,7 +1,7 @@
 using TMPro;
 using UnityEngine;
 using System.Collections.Generic;
-
+using UC;
 public class GameManager : MonoBehaviour
 {
     [SerializeField]

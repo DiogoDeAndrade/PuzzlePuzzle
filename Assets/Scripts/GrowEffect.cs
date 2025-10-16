@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using UC;
 
 public class GrowEffect : MonoBehaviour
 {
@@ -61,6 +62,6 @@ public class GrowEffect : MonoBehaviour
                 spriteRenderer.FadeTo(spriteRenderer.color.ChangeAlpha(0.0f), 5.0f).Done(() => RunAnimation());
             });
 
-        transform.ScaleTo(4.0f * Vector3.one, 10.0f);
+        transform.LocalScaleTo(4.0f * Vector3.one, 10.0f);
     }
 }

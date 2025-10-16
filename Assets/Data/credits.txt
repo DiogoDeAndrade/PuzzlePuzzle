@@ -1,0 +1,20 @@
+A Game By Diogo de Andrade
+
+<color=#a7d8dc><u>Art
+Puzzle Pack 2 by Kenney, CC0
+Photo Brown Wooden Cube on Gray Textile by Eva Bronzini, free to use
+Photo by Pixabay, CC0
+Photo Delicious Pancakes with Fresh Fruit Toppings by Beyza Yalçın, free to use
+Photo Vibrant Jellyfish in Dark Ocean Waters by Fotis Michalainas, free to use
+Everything else done by Diogo de Andrade, CC0
+
+<color=#a7d8dc><u>Sound
+Game Start Sound by plasterbrain, CC0
+In The Middle Of July Music Loop by rhodesmas, CC-BY 3.0
+Everything else done by Diogo de Andrade, CC0
+
+<color=#a7d8dc><u>Code
+Source code by Diogo de Andrade, MIT license
+
+Full game source available at https://github.com/DiogoDeAndrade/PuzzlePuzzle
+with complete credits (links, licences, etc)
