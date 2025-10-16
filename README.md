@@ -21,16 +21,11 @@ Press 'S' to skip a puzzle (cheat mode, this may be removed in the future, after
 
 ## To do
 
-- Lights on => Lights out
-- Change name of game to "Puzzle^3" or "BeatPuzzle^3" - rethink, if I add more stuff the name has to change
 - More images for tile backgrounds
 - More puzzles to combine (either in additional panels or in the same panel)
-- Add credits ingame
 - Remove rhythm game (don't believe it works)
 - Improve music (CC0 or Suno)
 - Improve itch.io page
-- Improve logo for game
-- Improved cursor
 
 ## Art
 
@@ -39,6 +34,7 @@ Press 'S' to skip a puzzle (cheat mode, this may be removed in the future, after
 - Photo [Assorted-color Pencil Set](https://www.pexels.com/photo/assorted-color-pencil-set-459799/) by [Pixabay](https://www.pexels.com/@pixabay/), licensed through the [CC0] license.
 - Photo [Delicious Pancakes with Fresh Fruit Toppings](https://www.pexels.com/photo/delicious-pancakes-with-fresh-fruit-toppings-30911365/) by [Beyza Yalçın](https://www.pexels.com/@beyza-yalcin-153182170/), free to use.
 - Photo [Vibrant Jellyfish in Dark Ocean Waters](https://www.pexels.com/photo/vibrant-jellyfish-in-dark-ocean-waters-30835507/) by [Fotis Michalainas](https://www.pexels.com/@fotis-michalainas-2149881541/), free to use.
+- Font [Rubik Bold](https://pt.fonts2u.com/rubik-bold.fonte) by [Hubert & Fischer](https://hfs-studio.com/), [SIL-OFL] license.
 - Everything else done by [Diogo de Andrade], licensed through the [CC0] license.
 
 ## Sound
@@ -66,4 +62,5 @@ Press 'S' to skip a puzzle (cheat mode, this may be removed in the future, after
 [OkapiKit]:https://github.com/VideojogosLusofona/OkapiKit
 [Unity Common]:https://github.com/DiogoDeAndrade/UnityCommon
 [Game Creator's Club]:https://game-creators-club.itch.io/
+[SIL-OFL]: https://scripts.sil.org/OFL
 [MIT]:LICENSE

@@ -11,7 +11,8 @@ Material:
   m_Shader: {fileID: -6465566751694194690, guid: a42a66f1e6cfedd46b174e56d7098930, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
-  m_ValidKeywords: []
+  m_ValidKeywords:
+  - _VIGNETTE
   m_InvalidKeywords: []
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
@@ -59,6 +60,8 @@ Material:
     - _EnableExternalAlpha: 0
     - _NoisePower: 3.11
     - _NoiseScale: 6
+    - _VIGNETTE: 1
+    - _Vignette_Power: 2
     - _ZWrite: 0
     m_Colors:
     - _Color: {r: 1, g: 1, b: 1, a: 1}

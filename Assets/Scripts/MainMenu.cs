@@ -41,7 +41,7 @@ public class MainMenu : MonoBehaviour
 
     void StartGame()
     {
-        FullscreenFader.FadeOut(0.5f, Color.black, () =>
+        FullscreenFader.FadeOut(0.25f, Color.black, () =>
         {
             SceneManager.LoadScene("GameScene");
         });
@@ -49,11 +49,11 @@ public class MainMenu : MonoBehaviour
 
     public void DisplayCredits()
     {
-        canvasGroup.FadeOut(0.5f);
+        canvasGroup.FadeOut(0.25f);
 
         var creditsCanvas = creditsScroll.GetComponent<CanvasGroup>();
         if (creditsCanvas == null) creditsCanvas = creditsScroll.GetComponentInParent<CanvasGroup>();
-        creditsCanvas.FadeIn(0.5f);
+        creditsCanvas.FadeIn(0.25f);
 
         creditsScroll.Reset();
         creditsScroll.onEndScroll += CreditsScroll_onEndScroll;
@@ -61,11 +61,11 @@ public class MainMenu : MonoBehaviour
 
     private void CreditsScroll_onEndScroll()
     {
-        canvasGroup.FadeIn(0.5f);
+        canvasGroup.FadeIn(0.25f);
 
         var creditsCanvas = creditsScroll.GetComponent<CanvasGroup>();
         if (creditsCanvas == null) creditsCanvas = creditsScroll.GetComponentInParent<CanvasGroup>();
-        creditsCanvas.FadeOut(0.5f);
+        creditsCanvas.FadeOut(0.25f);
 
         creditsScroll.onEndScroll -= CreditsScroll_onEndScroll;
     }
