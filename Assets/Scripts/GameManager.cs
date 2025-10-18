@@ -19,6 +19,10 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     private Puzzle      puzzlePrefab;
     [SerializeField]
+    private Hypertag    backgroundTag;
+    [SerializeField]
+    private Color[]     backgroundColors;
+    [SerializeField]
     private List<AudioClip> songs;
     [SerializeField]
     private List<Texture2D> images;
@@ -29,7 +33,7 @@ public class GameManager : MonoBehaviour
         set { _level = value; }
     }
 
-    Puzzle currentPuzzle;
+    Puzzle      currentPuzzle;
 
     public static GameManager Instance
     {
@@ -109,6 +113,19 @@ public class GameManager : MonoBehaviour
         currentPuzzle.transform.position = spawnPos.transform.position;
         currentPuzzle.InitLevel(GetLevel());
         currentPuzzle.transform.MoveTo(Vector3.zero, 0.25f).EaseFunction(Ease.Sqrt);
+
+        SpriteRenderer backgroundRenderer = Hypertag.FindFirstObjectWithHypertag<SpriteRenderer>(backgroundTag);
+        if (backgroundRenderer)
+        {
+            Color bgColor = backgroundColors[_level % backgroundColors.Length];
+            Material material = backgroundRenderer.material;
+            if (material)
+            {
+                material.SetColor("_Color2", bgColor);
+            }            
+
+            backgroundRenderer.color = bgColor;
+        }
     }
 
     public void NextLevel()

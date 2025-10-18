@@ -24,6 +24,7 @@ Press 'S' to skip a puzzle (cheat mode, this may be removed in the future, after
 - More images for tile backgrounds
 - More puzzles to combine (either in additional panels or in the same panel)
 - Remove rhythm game (don't believe it works)
+- Change background every level
 - Improve music (CC0 or Suno)
 - Improve itch.io page
 
