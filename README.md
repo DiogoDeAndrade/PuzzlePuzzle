@@ -24,9 +24,7 @@ Press 'S' to skip a puzzle (cheat mode, this may be removed in the future, after
 - More images for tile backgrounds
 - More puzzles to combine (either in additional panels or in the same panel)
 - Remove rhythm game (don't believe it works)
-- Change background every level
 - Improve music (CC0 or Suno)
-- Improve itch.io page
 
 ## Art
 
@@ -36,6 +34,7 @@ Press 'S' to skip a puzzle (cheat mode, this may be removed in the future, after
 - Photo [Delicious Pancakes with Fresh Fruit Toppings](https://www.pexels.com/photo/delicious-pancakes-with-fresh-fruit-toppings-30911365/) by [Beyza Yalçın](https://www.pexels.com/@beyza-yalcin-153182170/), free to use.
 - Photo [Vibrant Jellyfish in Dark Ocean Waters](https://www.pexels.com/photo/vibrant-jellyfish-in-dark-ocean-waters-30835507/) by [Fotis Michalainas](https://www.pexels.com/@fotis-michalainas-2149881541/), free to use.
 - Font [Rubik Bold](https://pt.fonts2u.com/rubik-bold.fonte) by [Hubert & Fischer](https://hfs-studio.com/), [SIL-OFL] license.
+- [Reload icons](https://www.flaticon.com/free-icons/reload) created by Pixel perfect - Flaticon, free for non-commercial use
 - Everything else done by [Diogo de Andrade], licensed through the [CC0] license.
 
 ## Sound

@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: d0efa4642568a264982ebdd50746bdb4
+guid: c412f7e4eabaedb4e9411c5d25a70674
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -7440996688034984944
-    second: NewButton_0
+      213: 7800973836096481040
+    second: NewButtonGlow_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -52,7 +52,7 @@ TextureImporter:
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
   spritePixelsToUnits: 2
-  spriteBorder: {x: 18, y: 18, z: 18, w: 18}
+  spriteBorder: {x: 34, y: 34, z: 34, w: 34}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
   alphaIsTransparency: 1
@@ -113,13 +113,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: NewButton_0
+      name: NewButtonGlow_0
       rect:
         serializedVersion: 2
-        x: 4
-        y: 4
-        width: 248
-        height: 248
+        x: 9
+        y: 9
+        width: 270
+        height: 270
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -128,8 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 01c01d2bfe44cb890800000000000000
-      internalID: -7440996688034984944
+      spriteID: 017a5a26f50a24c60800000000000000
+      internalID: 7800973836096481040
       vertices: []
       indices: 
       edges: []
@@ -148,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      NewButton_0: -7440996688034984944
+      NewButtonGlow_0: 7800973836096481040
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

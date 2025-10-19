@@ -1,7 +1,10 @@
-using TMPro;
-using UnityEngine;
+using System;
 using System.Collections.Generic;
+using TMPro;
 using UC;
+using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.SceneManagement;
 public class GameManager : MonoBehaviour
 {
     [SerializeField]
@@ -12,6 +15,8 @@ public class GameManager : MonoBehaviour
     private LevelDef[]  levels;
     [SerializeField]
     private Hypertag    levelDisplayTextTag;
+    [SerializeField]
+    private Hypertag    movesDisplayTextTag;
     [SerializeField]
     private Transform   spawnPos;
     [SerializeField]
@@ -34,6 +39,7 @@ public class GameManager : MonoBehaviour
     }
 
     Puzzle      currentPuzzle;
+    int         movesCount;       
 
     public static GameManager Instance
     {
@@ -76,15 +82,15 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
     public void Reset()
     {
         _level = 0;
+    }
+
+    public void ResetLevel()
+    {
+        EventSystem.current.SetSelectedGameObject(null);
+        currentPuzzle?.Restart();
     }
 
     public void InitLevel()
@@ -109,6 +115,8 @@ public class GameManager : MonoBehaviour
             }
         }
 
+        UpdateMovesCount();
+
         currentPuzzle = Instantiate(puzzlePrefab);
         currentPuzzle.transform.position = spawnPos.transform.position;
         currentPuzzle.InitLevel(GetLevel());
@@ -131,9 +139,34 @@ public class GameManager : MonoBehaviour
     public void NextLevel()
     {
         _level++;
+        movesCount = 0;
         PlayerPrefs.SetInt("CurrentLevel", _level);
         PlayerPrefs.Save();
         InitLevel();
+    }
+
+    void UpdateMovesCount()
+    {
+        if (movesDisplayTextTag)
+        {
+            var movesDisplayText = Hypertag.FindFirstObjectWithHypertag<TextMeshProUGUI>(movesDisplayTextTag);
+
+            if (movesDisplayText)
+            {
+                if (movesCount == 0)
+                    movesDisplayText.text = "No moves";
+                else if (movesCount == 1)
+                    movesDisplayText.text = $"{movesCount} Move";
+                else 
+                    movesDisplayText.text = $"{movesCount} Moves";
+            }
+        }
+    }
+
+    public void IncrementMoveCount()
+    {
+        movesCount++;
+        UpdateMovesCount();
     }
 
     LevelDef GetLevel()
@@ -195,5 +228,13 @@ public class GameManager : MonoBehaviour
         }
 
         return levels[_level];
+    }
+
+    public void ReturnToMainMenu()
+    {
+        FullscreenFader.FadeOut(0.5f, Color.black, () =>
+        {
+            SceneManager.LoadScene("MainMenu");
+        });
     }
 }

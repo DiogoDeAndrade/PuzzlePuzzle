@@ -1,6 +1,6 @@
-using System.Xml;
-using UnityEngine;
 using UC;
+using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class ToggleHint : MonoBehaviour
 {
@@ -23,12 +23,14 @@ public class ToggleHint : MonoBehaviour
 
         if (open)
         {
-            tweenAnimation = rectTransform.Move(new Vector3(180.0f, 0.0f, 0.0f), 0.25f).EaseFunction(Ease.Sqrt);
+            tweenAnimation = rectTransform.Move(new Vector3(220.0f, 0.0f, 0.0f), 0.25f).EaseFunction(Ease.Sqrt);
         }
         else
         {
-            tweenAnimation = rectTransform.Move(new Vector3(-180.0f, 0.0f, 0.0f), 0.25f).EaseFunction(Ease.Sqrt);
+            tweenAnimation = rectTransform.Move(new Vector3(-220.0f, 0.0f, 0.0f), 0.25f).EaseFunction(Ease.Sqrt);
         }
         open = !open;
+
+        EventSystem.current.SetSelectedGameObject(null);
     }
 }

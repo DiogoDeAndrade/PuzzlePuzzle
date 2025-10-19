@@ -93,9 +93,19 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 2371dcd588bc4674495af7308c0b51e5, type: 2}
   - {fileID: 11400000, guid: 9114db2bc979dc54ebd60e2e1e9cdabc, type: 2}
   levelDisplayTextTag: {fileID: 11400000, guid: ec14ac44a5a898246a4d0b39e49fadbe, type: 2}
+  movesDisplayTextTag: {fileID: 11400000, guid: 4f6e3c8d903e9ac4380118e073307634, type: 2}
   spawnPos: {fileID: 4881042034382928041}
   exitPos: {fileID: 7112069014391908441}
   puzzlePrefab: {fileID: 5227491694819372967, guid: 3103dd043cfb1d543bc792d3ff964143, type: 3}
+  backgroundTag: {fileID: 11400000, guid: 38b98a5ef0f30694d86414eaa8bcf47b, type: 2}
+  backgroundColors:
+  - {r: 0.16470584, g: 0.5372549, b: 0.5263122, a: 1}
+  - {r: 0.4577697, g: 0.764151, b: 0.4674449, a: 1}
+  - {r: 0.8034349, g: 0.8207547, b: 0.49167854, a: 1}
+  - {r: 0.7924528, g: 0.45276836, b: 0.42986828, a: 1}
+  - {r: 0.7830189, g: 0.4321378, b: 0.6869882, a: 1}
+  - {r: 0.65191865, g: 0.45056072, b: 0.764151, a: 1}
+  - {r: 0.42831078, g: 0.52872485, b: 0.7264151, a: 1}
   songs:
   - {fileID: 8300000, guid: c23e9338a0efb964ead883c0571f6ee2, type: 3}
   images:

@@ -23,6 +23,10 @@ public class Puzzle : MonoBehaviour
     [SerializeField]
     private SpriteRenderer      puzzleBackground;
     [SerializeField]
+    private SpriteRenderer      puzzleBackgroundGlow;
+    [SerializeField]
+    private Hypertag            backgroundTag;
+    [SerializeField]
     private Hypertag            solutionTextTag;
     [SerializeField]
     private SpriteRenderer      pumpSprite;
@@ -142,6 +146,8 @@ public class Puzzle : MonoBehaviour
                     // Animate
                     puzzleBackground.transform.localScale = Vector3.one * 1.1f;
                     puzzleBackground.transform.LocalScaleTo(Vector3.one, 0.75f * 60.0f / levelDef.bpm);
+                    puzzleBackgroundGlow.transform.localScale = Vector3.one * 1.1f;
+                    puzzleBackgroundGlow.transform.LocalScaleTo(Vector3.one, 0.75f * 60.0f / levelDef.bpm);                    
 
                     beatTime = Time.time;
                 }
@@ -175,10 +181,7 @@ public class Puzzle : MonoBehaviour
 
             if (Input.GetKeyDown(KeyCode.R))
             {
-                SoundManager.PlaySound(SoundType.PrimaryFX, badMoveSnd);
-
-                completed = false;
-                Build();
+                Restart();
             }
             if (Input.GetKeyDown(KeyCode.S))
             {
@@ -187,7 +190,19 @@ public class Puzzle : MonoBehaviour
                 completed = false;
                 GameManager.Instance.NextLevel();
             }
+            if (Input.GetKeyDown(KeyCode.Escape))
+            {
+                GameManager.Instance.ReturnToMainMenu();
+            }
         }
+    }
+
+    public void Restart()
+    {
+        SoundManager.PlaySound(SoundType.PrimaryFX, badMoveSnd);
+
+        completed = false;
+        Build();
     }
 
     void HandleLeftClick()
@@ -205,6 +220,8 @@ public class Puzzle : MonoBehaviour
                 // Ok sound
                 if (IsOnBeat(out float timeDistance))
                 {
+                    GameManager.Instance.IncrementMoveCount();
+
                     SoundManager.PlaySound(SoundType.PrimaryFX, goodMoveSnd, 0.7f, Random.Range(0.9f, 1.1f));
 
                     // Get actual object
@@ -260,6 +277,8 @@ public class Puzzle : MonoBehaviour
             // Ok sound 
             if (IsOnBeat(out float timeDistance))
             {
+                GameManager.Instance.IncrementMoveCount();
+
                 SoundManager.PlaySound(SoundType.PrimaryFX, goodMoveSnd, 0.7f, Random.Range(0.9f, 1.1f));
 
                 currentState.ToggleLight(gridPos);
@@ -322,6 +341,8 @@ public class Puzzle : MonoBehaviour
                 {
                     if (IsOnBeat(out float timeDistance))
                     {
+                        GameManager.Instance.IncrementMoveCount();
+
                         SoundManager.PlaySound(SoundType.PrimaryFX, goodMoveSnd, 0.7f, Random.Range(0.9f, 1.1f));
 
                         var rotationTween = currentTiles[gridPos.x, gridPos.y].Rotate(animationTime).Done(() => UpdatePipes());
@@ -340,7 +361,7 @@ public class Puzzle : MonoBehaviour
                     else
                     {
                         // Bad sound
-                        SoundManager.PlaySound(SoundType.PrimaryFX, goodMoveSnd, 0.7f, Random.Range(0.9f, 1.1f));
+                        SoundManager.PlaySound(SoundType.PrimaryFX, badMoveSnd, 0.7f, Random.Range(0.9f, 1.1f));
 
                         if (levelDef.undoLastOnBeatFail)
                         {
@@ -548,7 +569,21 @@ public class Puzzle : MonoBehaviour
 
         if (puzzleBackground)
         {
-            puzzleBackground.size = new Vector2(_tileSize.x * levelDef.gridSize.x + 8, _tileSize.y * levelDef.gridSize.y + 8);
+            puzzleBackground.size = new Vector2(_tileSize.x * levelDef.gridSize.x + 18, _tileSize.y * levelDef.gridSize.y + 18);
+        }
+        if (puzzleBackgroundGlow)
+        {
+            puzzleBackgroundGlow.size = new Vector2(_tileSize.x * levelDef.gridSize.x + 34, _tileSize.y * levelDef.gridSize.y + 34);
+
+            var backgroundSprite = Hypertag.FindFirstObjectWithHypertag<SpriteRenderer>(backgroundTag);
+            if (backgroundSprite)
+            {
+                var material = backgroundSprite.material;
+                if (material)
+                {
+                    puzzleBackgroundGlow.color = material.GetColor("_Color2");
+                }
+            }            
         }
 
         currentState = new PuzzleState(levelDef.puzzleType, levelDef.gridSize, levelDef.baseImage != null, levelDef.neightborhoodType, levelDef.neighborhoodDistance);
@@ -902,23 +937,25 @@ public class Puzzle : MonoBehaviour
 
             if (solutionText)
             {
-                var st = "";
+                int idx = 1;
+                var st = "Solution Steps\r\n————————\r\n\r\n";
                 foreach (var s in solution)
                 {
                     switch (s.action)
                     {
                         case SolutionElement.ActionType.Move:
-                            st += $"Move from {s.start.x},{s.start.y} to {s.end.x},{s.end.y}\n";
+                            st += $"{idx}. Move {s.start.x},{s.start.y} <voffset=0.2em>\u2192</voffset> {s.end.x},{s.end.y}\n";
                             break;
                         case SolutionElement.ActionType.ToggleLight:
-                            st += $"Toggle light at {s.start.x},{s.start.y}\n";
+                            st += $"{idx}.Toggle light at {s.start.x},{s.start.y}\n";
                             break;
                         case SolutionElement.ActionType.Rotate:
-                            st += $"Rotate piece at {s.start.x},{s.start.y}\n";
+                            st += $"{idx}.Rotate piece at {s.start.x},{s.start.y}\n";
                             break;
                         default:
                             break;
                     }
+                    idx++;
                 }
 
                 solutionText.text = st;
@@ -926,7 +963,7 @@ public class Puzzle : MonoBehaviour
                 RectTransform parentRT = solutionText.transform.parent as RectTransform;
                 if (parentRT)
                 {
-                    parentRT.sizeDelta = new Vector2(parentRT.sizeDelta.x, solution.Count * 17 + 40);
+                    parentRT.sizeDelta = new Vector2(parentRT.sizeDelta.x, (solution.Count + 3) * 17 + 50);
                 }
             }
         }
